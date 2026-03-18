@@ -2,11 +2,14 @@
   publish = "."
   functions = "netlify/functions"
 
+[functions]
+  node_bundler = "esbuild"
+
+[functions."generate"]
+  timeout = 60
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
-
-[functions]
-  node_bundler = "esbuild"
