@@ -19,11 +19,12 @@ exports.handler = async function(event) {
   }
 
   try {
-    const model = 'gemini-3.1-pro-preview';
+    // gemini-2.0-flash: free tier, ~3-5s per call, well within Netlify 10s timeout
+    const model = 'gemini-2.0-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Gemini 3.1 Pro is very verbose — use 6x multiplier, cap at 16000
-    const maxTokens = Math.min((body.max_tokens || 1000) * 6, 16000);
+    // gemini-2.0-flash has 8192 output token limit — use 2x multiplier, cap at 8192
+    const maxTokens = Math.min((body.max_tokens || 1000) * 2, 8192);
 
     const geminiBody = {
       systemInstruction: {
@@ -56,7 +57,7 @@ exports.handler = async function(event) {
     }
     if (data.error) console.log('Error:', JSON.stringify(data.error).slice(0,200));
 
-    // Extract text — skip thought parts
+    // Extract text — skip thought parts (not needed for Flash but safe to keep)
     let responseText = '';
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       const parts = data.candidates[0].content.parts;
@@ -68,7 +69,7 @@ exports.handler = async function(event) {
       }
     }
 
-    // Return in Anthropic-compatible format
+    // Return in Anthropic-compatible format so index.html needs no changes
     if (responseText) {
       return {
         statusCode: 200,
