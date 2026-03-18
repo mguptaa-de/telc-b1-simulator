@@ -22,8 +22,8 @@ exports.handler = async function(event) {
     const model = 'gemini-3.1-pro-preview';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Gemini is more verbose than Claude — multiply token limit by 4x
-    const maxTokens = Math.min((body.max_tokens || 1000) * 4, 8192);
+    // Gemini 3.1 Pro is very verbose — use 6x multiplier, cap at 16000
+    const maxTokens = Math.min((body.max_tokens || 1000) * 6, 16000);
 
     const geminiBody = {
       systemInstruction: {
@@ -47,7 +47,6 @@ exports.handler = async function(event) {
 
     const data = await response.json();
 
-    // Log for debugging
     console.log('Status:', response.status, 'MaxTokens:', maxTokens);
     if (data.candidates && data.candidates[0]) {
       const parts = data.candidates[0].content && data.candidates[0].content.parts;
@@ -57,7 +56,7 @@ exports.handler = async function(event) {
     }
     if (data.error) console.log('Error:', JSON.stringify(data.error).slice(0,200));
 
-    // Extract text (skip thought parts)
+    // Extract text — skip thought parts
     let responseText = '';
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       const parts = data.candidates[0].content.parts;
