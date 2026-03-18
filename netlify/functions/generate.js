@@ -21,11 +21,10 @@ exports.handler = async function(event) {
   }
 
   try {
-    // Use gemini-3.1-pro-preview — confirmed available on this API key
+    // gemini-3.1-pro-preview — requires billing enabled
     const model = 'gemini-3.1-pro-preview';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Convert Anthropic-style request → Gemini format
     const geminiBody = {
       systemInstruction: {
         parts: [{ text: body.system || 'Du bist ein hilfreicher Assistent.' }]
@@ -36,9 +35,8 @@ exports.handler = async function(event) {
       })),
       generationConfig: {
         maxOutputTokens: body.max_tokens || 1000,
-        temperature: body.temperature || 0.9,
-        // Disable thinking mode — we need plain JSON output, not reasoning traces
-        thinkingConfig: { thinkingBudget: 0 }
+        temperature: body.temperature || 0.9
+        // No thinkingConfig — model decides automatically when billing is active
       }
     };
 
@@ -50,10 +48,9 @@ exports.handler = async function(event) {
 
     const data = await response.json();
 
-    // Log for debugging
     console.log('Model:', model, 'Status:', response.status);
     if (data.error) {
-      console.log('Gemini error:', JSON.stringify(data.error));
+      console.log('Gemini error:', JSON.stringify(data.error).slice(0, 300));
     }
 
     return {
