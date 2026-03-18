@@ -8,7 +8,7 @@ exports.handler = async function(event) {
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: { message: 'GEMINI_API_KEY not set. Add it in Netlify → Site configuration → Environment variables.' }
+        error: { message: 'GEMINI_API_KEY not set.' }
       })
     };
   }
@@ -20,57 +20,67 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: JSON.stringify({ error: { message: 'Invalid JSON body' } }) };
   }
 
-  try {
-    // Convert Anthropic-style request to Gemini format
-    const model = 'gemini-1.5-pro';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+  // Try models in order of preference — fall back if one fails
+  const MODELS = [
+    'gemini-2.5-pro-preview-03-25',
+    'gemini-2.0-flash',
+    'gemini-1.5-pro'
+  ];
 
-    // Build Gemini request
-    const geminiBody = {
-      systemInstruction: {
-        parts: [{ text: body.system || 'Du bist ein hilfreicher Assistent.' }]
-      },
-      contents: (body.messages || []).map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      })),
-      generationConfig: {
-        maxOutputTokens: body.max_tokens || 1000,
-        temperature: body.temperature || 0.9
-      }
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody)
-    });
-
-    const data = await response.json();
-
-    // Handle Gemini errors
-    if (data.error) {
-      return {
-        statusCode: response.status,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: data.error })
-      };
+  const geminiBody = {
+    systemInstruction: {
+      parts: [{ text: body.system || 'Du bist ein hilfreicher Assistent.' }]
+    },
+    contents: (body.messages || []).map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    })),
+    generationConfig: {
+      maxOutputTokens: body.max_tokens || 1000,
+      temperature: body.temperature || 0.9
     }
+  };
 
-    // Return Gemini response as-is (HTML extractText() handles Gemini format)
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(data)
-    };
+  let lastError = null;
 
-  } catch (e) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: { message: 'Proxy error: ' + e.message } })
-    };
+  for (const model of MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiBody)
+      });
+
+      const data = await response.json();
+
+      // If model not found or not available, try next
+      if (data.error && (data.error.status === 'NOT_FOUND' || data.error.status === 'INVALID_ARGUMENT' || data.error.code === 404)) {
+        lastError = data.error;
+        continue;
+      }
+
+      // Return whatever we got (success or other error)
+      return {
+        statusCode: response.ok ? 200 : response.status,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'X-Model-Used': model
+        },
+        body: JSON.stringify(data)
+      };
+
+    } catch (e) {
+      lastError = { message: e.message };
+      continue;
+    }
   }
+
+  // All models failed
+  return {
+    statusCode: 500,
+    body: JSON.stringify({ error: lastError || { message: 'All models failed' } })
+  };
 };
