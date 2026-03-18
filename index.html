@@ -2247,8 +2247,10 @@ var genSYS = {
 };
 
 function parseGenJSON(txt) {
-  // Step 0: normalize typographic/curly quotes to straight quotes
-  var clean = txt
+  // Step 0a: strip Gemini thinking tags if present
+  var clean = txt.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  // Step 0b: normalize typographic/curly quotes to straight quotes
+  clean = clean
     .replace(/\u201e/g, '"').replace(/\u201c/g, '"').replace(/\u201d/g, '"')
     .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
     .replace(/[\u201e\u201c\u201d]/g, '"')
@@ -2335,9 +2337,16 @@ function parseGenJSON(txt) {
 }
 
 function extractText(d) {
-  // Handle both Gemini and Anthropic response formats
-  if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts)
-    return d.candidates[0].content.parts[0].text || '';
+  // Handle Gemini response (with or without thinking mode)
+  if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) {
+    var parts = d.candidates[0].content.parts;
+    // Thinking mode: find the non-thought part (actual response)
+    for (var i = parts.length - 1; i >= 0; i--) {
+      if (!parts[i].thought && parts[i].text) return parts[i].text;
+    }
+    return parts[0].text || '';
+  }
+  // Handle Anthropic response format
   if (d.content && d.content[0]) return d.content[0].text || '';
   return '';
 }
