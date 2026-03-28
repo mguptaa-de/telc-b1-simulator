@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TELC Deutsch B1 – Prüfungssimulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#f0ede6;--card:#fff;--txt:#1a1a1a;--txt2:#3a3a3a;--mut:#888;--bord:#d8d4cc;--blue:#2d5be3;--gold:#b8922a;--grn:#1a7a3c;--red:#c0392b;--cbg:#eaf5ee;--rbg:#fdf0f0;}
+[data-theme="dark"]{--bg:#18181c;--card:#232329;--txt:#e8e6e0;--txt2:#b0aeaa;--mut:#888;--bord:#4a4a54;--blue:#4a7cef;--gold:#d4a843;--grn:#2ea858;--red:#e05050;--cbg:#1a2e22;--rbg:#2e1a1a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:.93rem;line-height:1.6;}
+#cover{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;}
+.cv{max-width:680px;width:100%;text-align:center;}
+.cv-flag{display:flex;justify-content:center;gap:2px;margin-bottom:1.5rem;}
+.f1{width:28px;height:16px;background:#1a1a1a;}.f2{width:28px;height:16px;background:#c0392b;}.f3{width:28px;height:16px;background:#f1a700;}
+.cv-top{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.18em;color:var(--mut);margin-bottom:1.2rem;}
+.cv-title{font-size:3.2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.3rem;}.cv-title span{color:var(--gold);}
+.cv-sub{color:var(--mut);font-size:.88rem;margin-bottom:2rem;}
+.cv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);margin-bottom:2rem;}
+.cv-cell{background:var(--card);padding:.8rem .5rem;text-align:center;}
+.cv-n{font-size:1.7rem;font-weight:700;color:var(--gold);}.cv-l{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:var(--mut);margin-top:.2rem;}
+.cv-struct{background:var(--card);border:1px solid var(--bord);padding:1rem 1.4rem;text-align:left;margin-bottom:1.5rem;}
+.cv-sh{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.12em;color:var(--mut);border-bottom:1px solid var(--bord);padding-bottom:.5rem;margin-bottom:.6rem;}
+.cv-row{display:flex;justify-content:space-between;font-size:.8rem;padding:.22rem 0;color:var(--txt2);}.cv-row b{color:var(--gold);}
+.cv-row.tim{color:var(--mut);font-style:normal;font-weight:700;font-size:.77rem;}
+.cv-btns{display:flex;flex-direction:column;align-items:center;gap:.6rem;}
+.start-btn{background:var(--gold);color:#000;border:none;padding:.85rem 2.5rem;font-size:1rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;}
+.start-btn:hover{opacity:.88;}
+.gen-cover-btn,.th-btn-c{background:none;border:1px solid var(--bord);color:var(--txt2);padding:.5rem 1.2rem;font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;}
+#exam{display:none;}
+.eh{position:relative;display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.5rem;background:var(--card);border-bottom:1px solid var(--bord);position:sticky;top:0;z-index:100;}
+.badge{background:var(--gold);color:#000;font-size:.6rem;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;padding:.18rem .5rem;font-weight:700;}
+.eh-sec{font-size:.82rem;font-weight:600;color:var(--txt);margin-left:.7rem;}
+.eh-r{display:flex;align-items:center;gap:.8rem;}
+.th-btn{background:none;border:1px solid var(--bord);color:var(--txt2);padding:.28rem .7rem;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.timer-group{display:flex;align-items:center;gap:.4rem;}
+.timer-w{display:flex;flex-direction:column;align-items:center;}
+.t-lbl{font-size:.56rem;color:var(--mut);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;}
+.timer{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:600;color:var(--txt);}.timer.warn{color:var(--red);}
+.timer-sep{color:var(--bord);font-size:.9rem;}
+.sec-lbl{font-size:.56rem;}.sec-timer{font-size:.95rem;}
+.prog-t,.sec-prog-t{height:3px;background:var(--bord);}
+.prog-f{height:100%;background:var(--gold);transition:width .5s;}
+.sec-prog-f{height:100%;background:var(--blue);transition:width .5s;}
+.tabs{display:flex;border-bottom:1px solid var(--bord);background:var(--card);}
+.tab{flex:1;background:none;border:none;border-bottom:3px solid transparent;padding:.55rem .3rem;font-size:.7rem;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;color:var(--mut);cursor:pointer;transition:all .2s;}
+.tab.active,.tab:hover{color:var(--txt);border-bottom-color:var(--gold);}
+.tbadge{display:block;font-size:.56rem;color:var(--mut);margin-top:.15rem;letter-spacing:.03em;}
+.ebody{max-width:860px;margin:0 auto;padding:1.5rem 1.5rem 6rem;}
+.sp{display:none;}.sp.active{display:block;}
+.sh{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--bord);}
+.sh-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem;}
+.sh-title{font-size:1.35rem;font-weight:700;}.pts{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mut);background:var(--card);border:1px solid var(--bord);padding:.2rem .5rem;}
+.sh-desc{font-size:.82rem;color:var(--mut);}
+.sub-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--blue);border-top:1px solid var(--bord);padding:.5rem 0 .3rem;margin:1.5rem 0 .8rem;display:flex;align-items:center;gap:.6rem;}
+.sub-lbl::after{content:'';flex:1;height:1px;background:var(--bord);}
+.sub-note{color:var(--mut);font-weight:400;letter-spacing:.04em;}
+.tc{background:var(--card);border-left:3px solid var(--blue);padding:.8rem 1.1rem;margin-bottom:1rem;color:var(--txt);}
+.tc-meta{font-size:.75rem;color:var(--mut);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;}
+.tc-title{font-weight:600;font-size:.92rem;margin-bottom:.5rem;}
+.qb{background:var(--card);border:1px solid var(--bord);padding:1rem 1.2rem;margin-bottom:.7rem;color:var(--txt);}
+.qn{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--blue);letter-spacing:.08em;margin-bottom:.35rem;}
+.qt{font-size:.9rem;color:var(--txt2);margin-bottom:.7rem;line-height:1.6;}
+.opts{display:flex;flex-direction:column;gap:.35rem;}
+.opt{display:flex;align-items:center;gap:.6rem;padding:.45rem .7rem;border:1px solid var(--bord);background:var(--card);color:var(--txt);cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--blue);}.opt.sel{border-color:var(--blue);background:rgba(45,91,227,.07);}
+.opt.cor{border-color:var(--grn);background:var(--cbg);}.opt.wrg{border-color:var(--red);background:var(--rbg);}
+.ok{width:1.3rem;height:1.3rem;border:1px solid var(--bord);background:var(--bg);color:var(--txt);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.opt.sel .ok{background:var(--blue);color:#fff;border-color:var(--blue);}
+.opt.cor .ok{background:var(--grn);color:#fff;border-color:var(--grn);}
+.opt.wrg .ok{background:var(--red);color:#fff;border-color:var(--red);}
+.rfw{display:flex;gap:.5rem;margin-top:.3rem;}
+.rfb{flex:1;padding:.55rem;border:1px solid var(--bord);background:var(--card);color:var(--txt);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;transition:all .15s;}
+.rfb:hover{border-color:var(--blue);}.rfb.sel{border-color:var(--blue);background:rgba(45,91,227,.08);font-weight:600;}
+.rfb.cor{border-color:var(--grn);background:var(--cbg);color:var(--grn);font-weight:600;}
+.rfb.wrg{border-color:var(--red);background:var(--rbg);color:var(--red);}
+.fb{display:none;font-size:.78rem;margin-top:.4rem;padding:.3rem .5rem;}.fb.show{display:block;}
+.t1-heads{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-bottom:.8rem;}
+.t1-head{background:var(--card);border:1px solid var(--bord);padding:.5rem .6rem;font-size:.78rem;color:var(--txt);}
+.t1-lbl{font-weight:700;color:var(--gold);margin-right:.3rem;}
+.t1-item{background:var(--card);color:var(--txt);border:1px solid var(--bord);border-left:3px solid var(--bord);padding:.8rem 1rem;margin-bottom:.6rem;}
+.t1-num{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--blue);margin-bottom:.3rem;}
+.t1-body{font-size:.85rem;color:var(--txt2);line-height:1.7;margin-bottom:.5rem;}
+.t1-choices{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.4rem;}
+.t3-ads{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem;}
+.t3-ad{background:var(--card);border:1px solid var(--bord);padding:.6rem .7rem;font-size:.78rem;line-height:1.5;color:var(--txt);}
+.t3-lbl{font-weight:700;color:var(--gold);margin-right:.3rem;}
+.t3-sit{background:var(--card);color:var(--txt);border:1px solid var(--bord);border-left:3px solid var(--bord);padding:.7rem 1rem;margin-bottom:.5rem;}
+.t3-sit-num{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--blue);margin-bottom:.3rem;}
+.t3-sit-text{font-size:.85rem;color:var(--txt2);margin-bottom:.5rem;}
+.t3-choices,.t1-choices,.wb-gap-choices{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem;}
+.t3-fb,.t1-fb{font-size:.75rem;margin-top:.3rem;color:var(--grn);}
+.t3-btn{padding:.3rem .5rem;border:1px solid var(--bord);background:var(--card);color:var(--txt);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.75rem;min-width:2rem;text-align:center;}
+.t3-btn:hover{border-color:var(--blue);}.t3-btn.t3-sel{background:var(--blue);color:#fff;border-color:var(--blue);}
+.t3-btn.t3-cor{background:var(--grn);color:#fff;border-color:var(--grn);}.t3-btn.t3-wrong{background:var(--red);color:#fff;border-color:var(--red);}
+.t3-star{color:var(--gold);}
+.wb-grid{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:1rem;background:var(--card);border:1px solid var(--bord);padding:.6rem;}
+.wb-word{padding:.3rem .5rem;border:1px solid var(--bord);font-size:.78rem;font-family:'JetBrains Mono',monospace;color:var(--txt);background:var(--card);}
+.wb-lbl{color:var(--gold);font-weight:700;margin-right:.3rem;}.wb-word.wb-used{opacity:.4;text-decoration:line-through;}
+.wb-gap{background:var(--card);color:var(--txt);border:1px solid var(--bord);border-left:3px solid var(--bord);padding:.6rem 1rem;margin-bottom:.5rem;}
+.wb-gap-num{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--blue);margin-bottom:.3rem;}
+.wp{background:var(--card);border-left:3px solid var(--gold);padding:.9rem 1.1rem;margin-bottom:1rem;}
+.wp b{color:var(--gold);}.wp ul{margin:.5rem 0 .5rem 1.2rem;}.wp li{font-size:.85rem;color:var(--txt2);margin-bottom:.2rem;}
+.wc{font-size:.75rem;font-family:'JetBrains Mono',monospace;}.wok{color:var(--grn);}.wlo{color:var(--red);}
+.ef{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:.7rem 1.5rem;background:var(--card);border-top:1px solid var(--bord);z-index:99;}
+.efi{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mut);}
+.ebs{display:flex;gap:.5rem;}
+.fb-btn{padding:.5rem 1.2rem;border:1px solid var(--bord);background:var(--card);color:var(--txt);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;}
+.fb-btn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700;}
+.fb-btn.sub{background:var(--grn);color:#fff;border-color:var(--grn);font-weight:700;}
+#results{display:none;max-width:620px;margin:3rem auto;padding:1.5rem;background:var(--bg);color:var(--txt);}
+.rh{padding:1.5rem;margin-bottom:1.2rem;text-align:center;color:var(--txt);}
+.rh.pass{background:var(--cbg);border:2px solid var(--grn);}.rh.fail{background:var(--rbg);border:2px solid var(--red);}
+.rv{font-size:1.4rem;font-weight:700;margin-bottom:.3rem;color:var(--txt);}
+.rp{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--mut);}
+.rm{font-size:.82rem;color:var(--txt2);margin-top:.5rem;}
+.bg{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem;color:var(--txt);}
+.bc{background:var(--card);color:var(--txt);border:1px solid var(--bord);padding:.8rem;text-align:center;}
+.bn{font-size:.72rem;color:var(--mut);margin-bottom:.3rem;}.bs{font-size:1.3rem;font-weight:700;color:var(--txt);}.bm{font-size:.7rem;color:var(--mut);}
+.pn{font-size:.75rem;color:var(--mut);text-align:center;padding:.5rem;}
+.rbtn{display:block;width:100%;padding:.7rem;margin-bottom:.5rem;background:var(--card);color:var(--txt);border:1px solid var(--bord);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;}
+.rbtn.blue{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+
+
+.pp-h h2{font-size:1.1rem;}
+
+
+
+.st-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:2rem;}
+.st-icon{font-size:3rem;margin-bottom:.8rem;}.st-title{font-size:1.3rem;font-weight:700;margin-bottom:.5rem;}
+.st-info{font-size:.88rem;color:rgba(255,255,255,.7);margin-bottom:1.5rem;max-width:480px;}
+.st-timer-big{font-size:3.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--gold);}
+.st-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.2);margin:.8rem 0;}
+.st-bar{height:100%;background:var(--gold);transition:width 1s linear;}
+.st-next-info{font-size:.78rem;color:rgba(255,255,255,.5);}
+.tts-player{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin:.7rem 0 .3rem;}
+.tts-btn{font-size:.85rem;padding:.5rem 1.2rem;background:var(--blue);color:#fff;border:none;cursor:pointer;transition:background .2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.tts-btn:hover:not(:disabled){background:#2855c7;}.tts-btn:disabled{opacity:.5;cursor:default;}.tts-btn.playing{background:var(--grn);}
+.tts-meta{flex:1;min-width:140px;}
+.tts-track{font-size:.75rem;color:var(--mut);margin-bottom:.3rem;min-height:1.1rem;}
+.tts-bar-wrap{height:5px;background:var(--bord);border-radius:3px;}
+.tts-bar-fill{height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width .4s;}
+.tts-plays{font-size:.72rem;color:var(--mut);font-style:italic;white-space:nowrap;}
+.tts-read-box{background:var(--cbg);border:1px solid var(--grn);padding:.5rem .9rem;margin-top:.5rem;}
+.tts-read-label{font-size:.78rem;color:var(--grn);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.tts-cd-bar{height:4px;background:var(--bord);border-radius:2px;}
+.tts-cd-fill{height:100%;background:var(--grn);border-radius:2px;transition:width 1s linear;}
+</style>
+</head>
+<body>
+
+<div id="cover">
+<div class="cv">
+  <div class="cv-header-art">
+    <svg width="100%" viewBox="0 0 560 240" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:560px;margin:0 auto">
+      <!-- All elements centred on TELC B1 midpoint x=236 -->
+      <!-- 6 dots: total 74px wide, start x=199, centre x=236 -->
+      <circle cx="204" cy="18" r="5" fill="#FF9933"/>
+      <circle cx="217" cy="18" r="5" fill="#FFFFFF" stroke="#ccc" stroke-width="1"/>
+      <circle cx="230" cy="18" r="5" fill="#138808"/>
+      <circle cx="244" cy="18" r="5" fill="#1a1a1a"/>
+      <circle cx="257" cy="18" r="5" fill="#CC0000"/>
+      <circle cx="270" cy="18" r="5" fill="#FFCC00"/>
+      <!-- MANISH'S centred at x=236 -->
+      <text x="236" y="42" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#FF9933" letter-spacing="6">MANISH'S</text>
+      <rect x="184" y="48" width="108" height="1.5" rx="0.75" fill="#FF9933" opacity="0.6"/>
+      <!-- T E L with CSS var for dark mode -->
+      <text x="22"  y="168" font-family="sans-serif" font-size="88" font-weight="900" style="fill:var(--txt)">T</text>
+      <text x="87"  y="168" font-family="sans-serif" font-size="88" font-weight="900" style="fill:var(--txt)">E</text>
+      <text x="150" y="168" font-family="sans-serif" font-size="88" font-weight="900" style="fill:var(--txt)">L</text>
+      <!-- C in red -->
+      <text x="210" y="168" font-family="sans-serif" font-size="88" font-weight="900" fill="#CC0000">C</text>
+      <!-- B 1 in gold -->
+      <text x="320" y="168" font-family="sans-serif" font-size="88" font-weight="900" fill="#FFCC00">B</text>
+      <text x="385" y="168" font-family="sans-serif" font-size="88" font-weight="900" fill="#FFCC00">1</text>
+      <!-- PRÜFUNGSSIMULATION centred at x=236 -->
+      <text x="236" y="187" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="600" style="fill:var(--mut)" letter-spacing="4">PRÜFUNGSSIMULATION</text>
+      <!-- Three-color rule: x=22 to x=450 (3×140px) -->
+      <rect x="22"  y="200" width="140" height="2" rx="1" style="fill:var(--txt)"/>
+      <rect x="166" y="200" width="140" height="2" rx="1" fill="#CC0000"/>
+      <rect x="310" y="200" width="140" height="2" rx="1" fill="#FFCC00"/>
+    </svg>
+  </div>
+  <p class="cv-sub" style="margin-top:.5rem">Schriftliche Prüfung + Hörverstehen · Vollständige Simulation</p>
+  <div class="cv-stats">
+    <div class="cv-cell"><div class="cv-n">225</div><div class="cv-l">MAX. PUNKTE</div></div>
+    <div class="cv-cell"><div class="cv-n">150'</div><div class="cv-l">SCHRIFTL. PRÜFUNG</div></div>
+    <div class="cv-cell"><div class="cv-n">60%</div><div class="cv-l">BESTEHENSGRENZE</div></div>
+    <div class="cv-cell"><div class="cv-n">135</div><div class="cv-l">ZUM BESTEHEN</div></div>
+  </div>
+  <div class="cv-struct">
+    <div class="cv-sh">PRÜFUNGSSTRUKTUR · ZEITEN (OFFIZIELL)</div>
+    <div class="cv-row tim">⏱ Lesen+Sprachbausteine: 90 Min gemeinsam (freie Aufteilung)<span>–</span></div>
+    <div class="cv-row">1.1 Leseverstehen Teil 1 – Globalverstehen (5 Zuordnungen)<span><b>25 Pkt</b></span></div>
+    <div class="cv-row">1.1 Leseverstehen Teil 2 – Detailverstehen (5 Multiple-Choice)<span><b>25 Pkt</b></span></div>
+    <div class="cv-row">1.1 Leseverstehen Teil 3 – Selektives Verstehen (10 Zuordnungen)<span><b>25 Pkt</b></span></div>
+    <div class="cv-row">1.2 Sprachbausteine Teil 1 – Grammatik (10 MC)<span><b>15 Pkt</b></span></div>
+    <div class="cv-row">1.2 Sprachbausteine Teil 2 – Lexik (10 Zuordnungen)<span><b>15 Pkt</b></span></div>
+    <div class="cv-row tim">⏱ Schriftlicher Ausdruck: 30 Min<span>–</span></div>
+    <div class="cv-row tim">⏱ Hörverstehen: ~30 Min (audio-gesteuert)<span>–</span></div>
+    <div class="cv-row">2.1 Hörverstehen Teil 1 – Kurzaussagen (5 R/F · 1×)<span><b>25 Pkt</b></span></div>
+    <div class="cv-row">2.1 Hörverstehen Teil 2 – Interview (10 R/F · 2×)<span><b>25 Pkt</b></span></div>
+    <div class="cv-row">2.1 Hörverstehen Teil 3 – Durchsagen (5 R/F · 2×)<span><b>25 Pkt</b></span></div>
+  </div>
+  <div class="cv-btns">
+    <button class="start-btn" id="startBtn">Prüfung beginnen →</button>
+    <button class="gen-cover-btn" id="genCoverBtn" title="Generiert ein komplett neues Prüfungsset mit KI">⚡ Neues Modellpaper generieren</button>
+    <button class="th-btn-c" id="thCoverBtn">☀️ Helles Design</button>
+    <button class="gen-cover-btn" id="versionBtn" style="background:var(--card);border:1px solid var(--bord);color:var(--txt)">📋 Versionen</button>
+  </div>
+</div>
+</div>
+
+<div id="exam" style="display:none">
+  <div class="eh">
+    <div class="eh-l"><span class="badge">TELC B1</span><span class="eh-sec" id="secLabel">Leseverstehen</span></div>
+    <div class="eh-brand" style="position:absolute;left:50%;transform:translateX(-50%);font-size:.62rem;font-weight:700;letter-spacing:3px;color:var(--gold);opacity:0.7;white-space:nowrap;pointer-events:none">MANISH'S · PRÜFUNGSSIMULATION</div>
+    <div class="eh-r">
+      <button class="th-btn" id="thBtn">☀️ Hell</button>
+      <div class="timer-group">
+        <div class="timer-w"><span class="t-lbl">GESAMT</span><span class="timer" id="timer">150:00</span></div>
+        <div class="timer-sep">|</div>
+        <div class="timer-w"><span class="t-lbl sec-lbl" id="secTimerLbl">LESEN+SPRACHE</span><span class="timer sec-timer" id="secTimer">90:00</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="prog-t"><div class="prog-f" id="pbar" style="width:0%"></div></div>
+  <div class="sec-prog-t"><div class="sec-prog-f" id="secPbar" style="width:0%"></div></div>
+  <div class="tabs">
+    <button class="tab active" data-s="0">1.1 Lesen<span class="tbadge">75 Pkt · 90 Min*</span></button>
+    <button class="tab" data-s="1">1.2 Sprachbausteine<span class="tbadge">30 Pkt · 90 Min*</span></button>
+    <button class="tab" data-s="2">3. Schreiben<span class="tbadge">75 Pkt · ~30 Min</span></button>
+    <button class="tab" data-s="3">4. Hören<span class="tbadge">75 Pkt · ~30 Min</span></button>
+  </div>
+  <div class="ebody">
+
+  <div class="sp active" id="s0">
+    <div class="sh"><div class="sh-top"><h2 class="sh-title">1.1 Leseverstehen</h2><span class="pts">75 Pkt · 90 Min*</span></div><p class="sh-desc">Drei Aufgaben: Globalverstehen, Detailverstehen, Selektives Verstehen.</p></div>
+    <div class="sub-lbl">Teil 1 · Globalverstehen <span class="sub-note">25 Pkt · 5 Texte → Überschrift</span></div>
+    <div class="tc-meta" style="margin-bottom:.5rem">Ordnen Sie jedem Text (1–5) eine passende Überschrift (a–j) zu.</div>
+    <div class="t1-heads" id="t1-heads"><div class="t1-head"><span class="t1-lbl">a</span>Lernen durch Reisen</div><div class="t1-head"><span class="t1-lbl">b</span>Naturerlebnisse für die Kleinsten</div><div class="t1-head"><span class="t1-lbl">c</span>Früh üben: Hotels bieten Skikurse für Zweijährige an</div><div class="t1-head"><span class="t1-lbl">d</span>Ein Schüler mit vielen Ideen</div><div class="t1-head"><span class="t1-lbl">e</span>Stadtticket macht Bus &amp; Bahn attraktiv</div><div class="t1-head"><span class="t1-lbl">f</span>Sicher nach Hause – auch nachts</div><div class="t1-head"><span class="t1-lbl">g</span>Familienfreundliches Fahrradfahren</div><div class="t1-head"><span class="t1-lbl">h</span>Mit der Technik groß werden</div><div class="t1-head"><span class="t1-lbl">i</span>Gesundes Essen für unterwegs</div><div class="t1-head"><span class="t1-lbl">j</span>Bildband: Babys im Garten</div></div>
+    <div id="t1-texts"><div class="t1-item" data-cor="b" data-q="t1-1" data-pts="5"><div class="t1-num">TEXT 1</div><div class="t1-body"><p>Viele Eltern sind der Meinung, dass Kinder am besten in der freien Natur spielen sollen. Ein neues Buch mit wunderschönen Fotografien zeigt Babys und Kleinkinder beim Toben, Matschen und Entdecken.</p></div><div class="t1-choices" id="t1c-1"></div><div class="t3-fb" id="t1fb-1"></div></div><div class="t1-item" data-cor="c" data-q="t1-2" data-pts="5"><div class="t1-num">TEXT 2</div><div class="t1-body"><p>Immer mehr Hotels im Alpenraum bieten spezielle Skikurse für Kinder ab zwei Jahren an. Die Kleinen lernen auf kindgerechtem Gelände erste Schwünge. Experten betonen dabei auch die Risiken.</p></div><div class="t1-choices" id="t1c-2"></div><div class="t3-fb" id="t1fb-2"></div></div><div class="t1-item" data-cor="d" data-q="t1-3" data-pts="5"><div class="t1-num">TEXT 3</div><div class="t1-body"><p>Der 14-jährige Max aus Berlin hat ein Lernspiel erfunden, das bereits in mehreren Schulen eingesetzt wird. Er möchte damit anderen Kindern das Lernen erleichtern.</p></div><div class="t1-choices" id="t1c-3"></div><div class="t3-fb" id="t1fb-3"></div></div><div class="t1-item" data-cor="e" data-q="t1-4" data-pts="5"><div class="t1-num">TEXT 4</div><div class="t1-body"><p>Die Stadt führt ein neues Jahresticket für alle öffentlichen Verkehrsmittel ein. Mit dem günstigen Preis sollen Berufstätige aus dem Auto gelockt werden.</p></div><div class="t1-choices" id="t1c-4"></div><div class="t3-fb" id="t1fb-4"></div></div><div class="t1-item" data-cor="f" data-q="t1-5" data-pts="5"><div class="t1-num">TEXT 5</div><div class="t1-body"><p>Ein neuer Taxidienst bringt junge Leute sicher nach Hause – ohne Alkohol am Steuer. Die Fahrer sind ausgebildet und kennen die Stadt. Der Service ist am Wochenende stark nachgefragt.</p></div><div class="t1-choices" id="t1c-5"></div><div class="t3-fb" id="t1fb-5"></div></div></div>
+    <div class="sub-lbl">Teil 2 · Detailverstehen <span class="sub-note">25 Pkt · 5×5 · Multiple Choice a/b/c</span></div>
+    <div id="lesen2-block">
+      <div class="tc"><div class="tc-meta">Lesen Sie den Text und die Aufgaben 6–10. Welche Lösung (a, b oder c) ist richtig?</div>
+      <p class="tc-title">Geheimnisse des Schlafes</p>
+      <p style="font-size:.88rem;line-height:1.8;color:var(--txt2)">Schlaf ist für unsere Gesundheit genauso wichtig wie Essen und Trinken. Trotzdem schlafen viele Menschen zu wenig oder schlecht. Wissenschaftler erforschen seit Jahren, was im Gehirn passiert, wenn wir schlafen.<br><br>Während des Schlafs verarbeitet das Gehirn die Erlebnisse des Tages und speichert wichtige Informationen im Langzeitgedächtnis. Wer vor einer Prüfung gut schläft, erinnert sich besser an den Lernstoff. Das haben Studien eindeutig gezeigt.<br><br>Experten empfehlen Erwachsenen sieben bis acht Stunden Schlaf pro Nacht. Nicht nur die Länge ist wichtig – auch die Qualität zählt. Wer nachts oft aufwacht, fühlt sich tagsüber müde. Regelmäßige Schlafzeiten helfen den natürlichen Rhythmus des Körpers.</p></div>
+      <div class="qb" data-type="mcq" data-cor="b" data-sec="0" data-pts="5"><div class="qn">AUFGABE 6</div><div class="qt">Was passiert laut dem Text beim Schlafen?</div><div class="opts"><label class="opt"><input type="radio" name="q6" value="a"><span class="ok">a</span>Es produziert neue Energie</label><label class="opt"><input type="radio" name="q6" value="b"><span class="ok">b</span>Es verarbeitet Erlebnisse und speichert Wissen</label><label class="opt"><input type="radio" name="q6" value="c"><span class="ok">c</span>Es bereitet sich auf den nächsten Tag vor</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="0" data-pts="5"><div class="qn">AUFGABE 7</div><div class="qt">Was zeigen Studien über Lernen und Schlaf?</div><div class="opts"><label class="opt"><input type="radio" name="q7" value="a"><span class="ok">a</span>Schüler sollten vor Prüfungen weniger lernen</label><label class="opt"><input type="radio" name="q7" value="b"><span class="ok">b</span>Guter Schlaf vor Prüfungen verbessert die Erinnerung</label><label class="opt"><input type="radio" name="q7" value="c"><span class="ok">c</span>Schlaf ersetzt das Lernen</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="0" data-pts="5"><div class="qn">AUFGABE 8</div><div class="qt">Wie viele Stunden Schlaf empfehlen Experten?</div><div class="opts"><label class="opt"><input type="radio" name="q8" value="a"><span class="ok">a</span>Fünf bis sechs</label><label class="opt"><input type="radio" name="q8" value="b"><span class="ok">b</span>Sieben bis acht</label><label class="opt"><input type="radio" name="q8" value="c"><span class="ok">c</span>Neun bis zehn</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="c" data-sec="0" data-pts="5"><div class="qn">AUFGABE 9</div><div class="qt">Was beeinflusst die Schlafqualität negativ?</div><div class="opts"><label class="opt"><input type="radio" name="q9" value="a"><span class="ok">a</span>Zu wenig Tageslicht</label><label class="opt"><input type="radio" name="q9" value="b"><span class="ok">b</span>Unregelmäßige Mahlzeiten</label><label class="opt"><input type="radio" name="q9" value="c"><span class="ok">c</span>Häufiges nächtliches Aufwachen</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="a" data-sec="0" data-pts="5"><div class="qn">AUFGABE 10</div><div class="qt">Was empfehlen Experten für besseren Schlaf?</div><div class="opts"><label class="opt"><input type="radio" name="q10" value="a"><span class="ok">a</span>Feste Schlafzeiten einhalten</label><label class="opt"><input type="radio" name="q10" value="b"><span class="ok">b</span>Vor dem Schlafen Sport treiben</label><label class="opt"><input type="radio" name="q10" value="c"><span class="ok">c</span>Ein schweres Abendessen essen</label></div><div class="fb"></div></div>
+    </div>
+    <div class="sub-lbl">Teil 3 · Selektives Verstehen <span class="sub-note">25 Pkt · 6×5 · Anzeigen zuordnen</span></div>
+    <div class="tc-meta" style="margin-bottom:.5rem">Welche Anzeige passt zu welcher Situation? ★ = wird bewertet · x = keine passende Anzeige</div>
+    <div class="t3-ads" id="t3-ads"><div class="t3-ad"><span class="t3-lbl">a</span>Café Weberknecht – Gemütliches Café im 7. Bezirk. Frühstück ab 8 Uhr, warme Küche bis Mitternacht. Wir suchen Aushilfen für das Wochenende.</div><div class="t3-ad"><span class="t3-lbl">b</span>Privatkindergarten Regenbogen – Wir betreuen Kinder von 1–6 Jahren in kleinen Gruppen. Anmeldung jetzt für das Herbstsemester.</div><div class="t3-ad"><span class="t3-lbl">c</span>Kino-Center Mitte – Täglich 5 Vorführungen. Studentenrabatt: 20%. Jetzt online Karten kaufen.</div><div class="t3-ad"><span class="t3-lbl">d</span>Partyservice Fröhlich – Wir kochen und liefern für Ihre Feier. Buffet, Fingerfood oder Menü.</div><div class="t3-ad"><span class="t3-lbl">e</span>AirPlus – Studentenjob gesucht! Büroarbeit 15h/Woche, flexible Zeiten, gute Bezahlung.</div><div class="t3-ad"><span class="t3-lbl">f</span>Ich bin Psychologiestudentin, 23 J., und biete Babysitting an. Erfahrung mit Kindern von 0–10 Jahren.</div><div class="t3-ad"><span class="t3-lbl">g</span>Studentenwohnung Wien – 2-Zimmer, 48 m², Nähe Uni, voll möbliert, 650 € warm. Frei ab 1. Oktober.</div><div class="t3-ad"><span class="t3-lbl">h</span>Kino unter Sternen – Jeden Sommer im Augarten! Open-Air-Kino mit internationalem Programm. Eintritt frei.</div><div class="t3-ad"><span class="t3-lbl">i</span>VHS Simmering – PC-Kurse für Anfänger und Fortgeschrittene. Word, Excel, Internet.</div><div class="t3-ad"><span class="t3-lbl">j</span>Familie Hofer sucht zuverlässige Babysitterin für 2 Kinder (4 und 7 Jahre). Dienstags und donnerstags.</div><div class="t3-ad"><span class="t3-lbl">k</span>Stadtkino Wien – Wir suchen Mitarbeiter für den Sommer. Servicekräfte, Kassenpersonal.</div><div class="t3-ad"><span class="t3-lbl">l</span>Wir vermieten unsere zweite Wohnung (1 Zimmer) für kurze Zeit. Ideal für Touristen oder Studenten.</div></div>
+    <div id="t3-situations"><div class="t3-sit" data-cor="g" data-q="11" data-pts="5"><div class="t3-sit-num">SITUATION 11 ★</div><div class="t3-sit-text">Sie sind Student und suchen eine möblierte Wohnung in der Nähe der Universität.</div><div class="t3-choices" id="t3c-11"></div><div class="t3-fb" id="t3fb-11"></div></div><div class="t3-sit" data-cor="f" data-q="12" data-pts="5"><div class="t3-sit-num">SITUATION 12 ★</div><div class="t3-sit-text">Sie studieren Pädagogik und möchten durch Babysitting etwas Geld verdienen.</div><div class="t3-choices" id="t3c-12"></div><div class="t3-fb" id="t3fb-12"></div></div><div class="t3-sit" data-cor="k" data-q="13" data-pts="5"><div class="t3-sit-num">SITUATION 13 ★</div><div class="t3-sit-text">Sie suchen einen Nebenjob im Kulturbereich für den Sommer.</div><div class="t3-choices" id="t3c-13"></div><div class="t3-fb" id="t3fb-13"></div></div><div class="t3-sit" data-cor="d" data-q="14" data-pts="5"><div class="t3-sit-num">SITUATION 14 ★</div><div class="t3-sit-text">Sie möchten für Ihre Geburtstagsfeier Essen liefern lassen.</div><div class="t3-choices" id="t3c-14"></div><div class="t3-fb" id="t3fb-14"></div></div><div class="t3-sit" data-cor="b" data-q="15" data-pts="5"><div class="t3-sit-num">SITUATION 15 ★</div><div class="t3-sit-text">Ihr Kind ist drei Jahre alt und Sie suchen eine Betreuung unter der Woche.</div><div class="t3-choices" id="t3c-15"></div><div class="t3-fb" id="t3fb-15"></div></div><div class="t3-sit" data-cor="e" data-q="16" data-pts="5"><div class="t3-sit-num">SITUATION 16 ★</div><div class="t3-sit-text">Sie suchen einen Studentenjob im Büro mit flexiblen Arbeitszeiten.</div><div class="t3-choices" id="t3c-16"></div><div class="t3-fb" id="t3fb-16"></div></div><div class="t3-sit" data-cor="i" data-q="17" data-pts="0"><div class="t3-sit-num">SITUATION 17</div><div class="t3-sit-text">Sie interessieren sich für einen Computerkurs für Anfänger.</div><div class="t3-choices" id="t3c-17"></div><div class="t3-fb" id="t3fb-17"></div></div><div class="t3-sit" data-cor="x" data-q="18" data-pts="0"><div class="t3-sit-num">SITUATION 18</div><div class="t3-sit-text">Sie suchen ein kleines Restaurant für ein romantisches Abendessen.</div><div class="t3-choices" id="t3c-18"></div><div class="t3-fb" id="t3fb-18"></div></div><div class="t3-sit" data-cor="c" data-q="19" data-pts="0"><div class="t3-sit-num">SITUATION 19</div><div class="t3-sit-text">Sie möchten günstig ins Kino gehen und haben einen Studentenausweis.</div><div class="t3-choices" id="t3c-19"></div><div class="t3-fb" id="t3fb-19"></div></div><div class="t3-sit" data-cor="x" data-q="20" data-pts="0"><div class="t3-sit-num">SITUATION 20</div><div class="t3-sit-text">Sie suchen jemanden, der Ihre Katze betreut, während Sie im Urlaub sind.</div><div class="t3-choices" id="t3c-20"></div><div class="t3-fb" id="t3fb-20"></div></div></div>
+  </div><!-- /s0 -->
+
+  <div class="sp" id="s1">
+    <div class="sh"><div class="sh-top"><h2 class="sh-title">1.2 Sprachbausteine</h2><span class="pts">30 Pkt · 90 Min*</span></div><p class="sh-desc">Grammatik und Lexik: Lücken im Text schließen.</p></div>
+    <div class="sub-lbl">Teil 1 · Grammatik <span class="sub-note">15 Pkt · 10×1,5 · Multiple Choice</span></div>
+    <div id="sb1-content">
+    <div class="tc"><div class="tc-meta">Lesen Sie den Brief und schließen Sie die Lücken 21–30.</div>
+    <p class="tc-title">Brief an den Vermieter</p>
+    <p style="font-size:.85rem;line-height:2.1;color:var(--txt2)">Sehr geehrter Herr Meyerhofer,<br>ich schreibe Ihnen in <b style="color:var(--gold)">(21)</b> Auftrag meiner Chefin, Frau Dr. Waldmann. Sie <b style="color:var(--gold)">(22)</b> leider erkrankt und kann den Termin nicht wahrnehmen. <b style="color:var(--gold)">(23)</b> es möglich, den Termin zu verschieben? <b style="color:var(--gold)">(24)</b> dem Urlaub wäre sie ab dem 15. wieder erreichbar. <b style="color:var(--gold)">(25)</b> Zeitraum zwischen dem 15. und 22. wäre für uns ideal. Bitte teilen Sie uns mit, <b style="color:var(--gold)">(26)</b> Zeit Ihnen passt. Das Büro ist montags bis freitags <b style="color:var(--gold)">(27)</b> der Zeit von 9 bis 17 Uhr <b style="color:var(--gold)">(28)</b>. Falls es <b style="color:var(--gold)">(29)</b> geben sollte, melden Sie sich bitte bei mir. Ich hoffe, <b style="color:var(--gold)">(30)</b> wir schnell eine Lösung finden.<br>Mit freundlichen Grüßen, Anneliese Kühne</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem"><div class="qb" data-type="mcq" data-cor="b" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 21</div><div class="qt">Lücke 21</div><div class="opts"><label class="opt"><input type="radio" name="q21" value="a"><span class="ok">a</span>meine</label><label class="opt"><input type="radio" name="q21" value="b"><span class="ok">b</span>Ihrem</label><label class="opt"><input type="radio" name="q21" value="c"><span class="ok">c</span>seinen</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="a" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 22</div><div class="qt">Lücke 22</div><div class="opts"><label class="opt"><input type="radio" name="q22" value="a"><span class="ok">a</span>war</label><label class="opt"><input type="radio" name="q22" value="b"><span class="ok">b</span>ist</label><label class="opt"><input type="radio" name="q22" value="c"><span class="ok">c</span>wird</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 23</div><div class="qt">Lücke 23</div><div class="opts"><label class="opt"><input type="radio" name="q23" value="a"><span class="ok">a</span>Wäre</label><label class="opt"><input type="radio" name="q23" value="b"><span class="ok">b</span>Ist</label><label class="opt"><input type="radio" name="q23" value="c"><span class="ok">c</span>War</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="a" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 24</div><div class="qt">Lücke 24</div><div class="opts"><label class="opt"><input type="radio" name="q24" value="a"><span class="ok">a</span>Nach</label><label class="opt"><input type="radio" name="q24" value="b"><span class="ok">b</span>Vor</label><label class="opt"><input type="radio" name="q24" value="c"><span class="ok">c</span>Seit</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 25</div><div class="qt">Lücke 25</div><div class="opts"><label class="opt"><input type="radio" name="q25" value="a"><span class="ok">a</span>Diese</label><label class="opt"><input type="radio" name="q25" value="b"><span class="ok">b</span>Den</label><label class="opt"><input type="radio" name="q25" value="c"><span class="ok">c</span>Einem</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 26</div><div class="qt">Lücke 26</div><div class="opts"><label class="opt"><input type="radio" name="q26" value="a"><span class="ok">a</span>welcher</label><label class="opt"><input type="radio" name="q26" value="b"><span class="ok">b</span>die</label><label class="opt"><input type="radio" name="q26" value="c"><span class="ok">c</span>was</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 27</div><div class="qt">Lücke 27</div><div class="opts"><label class="opt"><input type="radio" name="q27" value="a"><span class="ok">a</span>bei</label><label class="opt"><input type="radio" name="q27" value="b"><span class="ok">b</span>in</label><label class="opt"><input type="radio" name="q27" value="c"><span class="ok">c</span>an</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="a" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 28</div><div class="qt">Lücke 28</div><div class="opts"><label class="opt"><input type="radio" name="q28" value="a"><span class="ok">a</span>geöffnet</label><label class="opt"><input type="radio" name="q28" value="b"><span class="ok">b</span>offen</label><label class="opt"><input type="radio" name="q28" value="c"><span class="ok">c</span>zu</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="b" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 29</div><div class="qt">Lücke 29</div><div class="opts"><label class="opt"><input type="radio" name="q29" value="a"><span class="ok">a</span>Fragen</label><label class="opt"><input type="radio" name="q29" value="b"><span class="ok">b</span>Probleme</label><label class="opt"><input type="radio" name="q29" value="c"><span class="ok">c</span>Termine</label></div><div class="fb"></div></div><div class="qb" data-type="mcq" data-cor="c" data-sec="1" data-pts="1.5"><div class="qn">AUFGABE 30</div><div class="qt">Lücke 30</div><div class="opts"><label class="opt"><input type="radio" name="q30" value="a"><span class="ok">a</span>wenn</label><label class="opt"><input type="radio" name="q30" value="b"><span class="ok">b</span>man</label><label class="opt"><input type="radio" name="q30" value="c"><span class="ok">c</span>dass</label></div><div class="fb"></div></div></div>
+    </div><!-- /sb1-content -->
+    <div class="sub-lbl">Teil 2 · Lexik <span class="sub-note">15 Pkt · 10×1,5 · Wortbank</span></div>
+    <div class="tc"><div class="tc-meta">Welches Wort (a–o) passt in welche Lücke (31–40)?</div>
+    <p class="tc-title">Brief an eine Freundin</p>
+    <p id="sb2-letter-para" style="font-size:.85rem;line-height:2.1;color:var(--txt2)">Liebe Daniela,<br>ich wollte <b style="color:var(--gold)">(31)</b> schon lange schreiben, aber ich hatte keine Zeit. Ich arbeite jetzt <b style="color:var(--gold)">(32)</b> Ende des Monats bei einer neuen Firma. Es ist toll, <b style="color:var(--gold)">(33)</b> die Kollegen so nett sind. Leider fahre ich <b style="color:var(--gold)">(34)</b> dem Auto zur Arbeit. <b style="color:var(--gold)">(35)</b> Laune hatte ich am ersten Tag. Ich verdiene jetzt 200 Euro <b style="color:var(--gold)">(36)</b> Monat mehr. Du weißt, <b style="color:var(--gold)">(37)</b> ich das brauche. Die Stelle gilt <b style="color:var(--gold)">(38)</b> nächsten Sommer. Ich bekomme 25 Urlaubstage <b style="color:var(--gold)">(39)</b> Jahr. Ich <b style="color:var(--gold)">(40)</b> gerne mit dir feiern!<br>Viele Grüße, Karin</p>
+    </div>
+    <div style="margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mut)">Wortbank (a–o):</div>
+    <div class="wb-grid"><div class="wb-word" data-letter="a"><span class="wb-lbl">a</span>AM</div><div class="wb-word" data-letter="b"><span class="wb-lbl">b</span>BIS</div><div class="wb-word" data-letter="c"><span class="wb-lbl">c</span>DASS</div><div class="wb-word" data-letter="d"><span class="wb-lbl">d</span>FÜR</div><div class="wb-word" data-letter="e"><span class="wb-lbl">e</span>GUTE</div><div class="wb-word" data-letter="f"><span class="wb-lbl">f</span>KEINE</div><div class="wb-word" data-letter="g"><span class="wb-lbl">g</span>MICH</div><div class="wb-word" data-letter="h"><span class="wb-lbl">h</span>MIR</div><div class="wb-word" data-letter="i"><span class="wb-lbl">i</span>MIT</div><div class="wb-word" data-letter="j"><span class="wb-lbl">j</span>MÖCHTE</div><div class="wb-word" data-letter="k"><span class="wb-lbl">k</span>OHNE</div><div class="wb-word" data-letter="l"><span class="wb-lbl">l</span>PRO</div><div class="wb-word" data-letter="m"><span class="wb-lbl">m</span>WÄHREND</div><div class="wb-word" data-letter="n"><span class="wb-lbl">n</span>WÄRE</div><div class="wb-word" data-letter="o"><span class="wb-lbl">o</span>WÜRDEN</div></div>
+    <div id="wb-gaps"><div class="wb-gap" data-gap="31" data-cor="h"><div class="wb-gap-num">Lücke 31</div><div class="wb-gap-choices" id="wbc-31"></div><div class="t3-fb" id="wbfb-31"></div></div><div class="wb-gap" data-gap="32" data-cor="b"><div class="wb-gap-num">Lücke 32</div><div class="wb-gap-choices" id="wbc-32"></div><div class="t3-fb" id="wbfb-32"></div></div><div class="wb-gap" data-gap="33" data-cor="c"><div class="wb-gap-num">Lücke 33</div><div class="wb-gap-choices" id="wbc-33"></div><div class="t3-fb" id="wbfb-33"></div></div><div class="wb-gap" data-gap="34" data-cor="i"><div class="wb-gap-num">Lücke 34</div><div class="wb-gap-choices" id="wbc-34"></div><div class="t3-fb" id="wbfb-34"></div></div><div class="wb-gap" data-gap="35" data-cor="e"><div class="wb-gap-num">Lücke 35</div><div class="wb-gap-choices" id="wbc-35"></div><div class="t3-fb" id="wbfb-35"></div></div><div class="wb-gap" data-gap="36" data-cor="a"><div class="wb-gap-num">Lücke 36</div><div class="wb-gap-choices" id="wbc-36"></div><div class="t3-fb" id="wbfb-36"></div></div><div class="wb-gap" data-gap="37" data-cor="c"><div class="wb-gap-num">Lücke 37</div><div class="wb-gap-choices" id="wbc-37"></div><div class="t3-fb" id="wbfb-37"></div></div><div class="wb-gap" data-gap="38" data-cor="b"><div class="wb-gap-num">Lücke 38</div><div class="wb-gap-choices" id="wbc-38"></div><div class="t3-fb" id="wbfb-38"></div></div><div class="wb-gap" data-gap="39" data-cor="l"><div class="wb-gap-num">Lücke 39</div><div class="wb-gap-choices" id="wbc-39"></div><div class="t3-fb" id="wbfb-39"></div></div><div class="wb-gap" data-gap="40" data-cor="j"><div class="wb-gap-num">Lücke 40</div><div class="wb-gap-choices" id="wbc-40"></div><div class="t3-fb" id="wbfb-40"></div></div></div>
+  </div><!-- /s1 -->
+
+  <div class="sp" id="s2">
+    <div class="sh"><div class="sh-top"><h2 class="sh-title">3. Schreiben</h2><span class="pts">Prüfer bewertet · 30 Min</span></div><p class="sh-desc">Schreiben Sie einen Brief oder eine E-Mail als Antwort. Mindestens 100 Wörter.</p></div>
+    <div id="schreiben-block">
+    <div class="tc" style="border-left-color:var(--blue)"><div class="tc-meta">Sie haben folgende E-Mail von Ihrer Freundin Sophie bekommen:</div>
+    <div style="font-size:.9rem;line-height:1.9;color:var(--txt2);font-style:italic;background:var(--bg);padding:1.1rem;border-left:3px solid rgba(74,124,220,.3)">
+    <p>Liebe(r) ........</p>
+    <p style="margin-top:.6rem">wir haben lange nichts mehr voneinander gehört. Ich hoffe, es geht dir gut. Gibt es bei dir Neuigkeiten? Ich bin nun schon seit zwei Monaten in Würzburg, und mein neuer Job gefällt mir sehr gut. In der Firma fühle ich mich wohl, mit meinen Kollegen verstehe ich mich prima und die Arbeit macht mir großen Spaß.</p>
+    <p style="margin-top:.6rem">Allerdings habe ich ein Problem: Außer meinen Kollegen kenne ich hier in der Stadt noch niemanden. In meiner Freizeit bin ich oft allein und weiß nicht, was ich machen soll. Wie könnte ich neue Leute kennenlernen? Hast du vielleicht einen Tipp für mich?</p>
+    <p style="margin-top:.6rem">Würzburg ist wirklich eine schöne Stadt mit vielen Sehenswürdigkeiten. Hast du Lust, mich mal an einem Wochenende zu besuchen? Ich würde mich sehr freuen.</p>
+    <p style="margin-top:.6rem">Viele Grüße<br>Sophie</p>
+    </div></div>
+    <div class="wp"><b>Aufgabe: Antworten Sie Sophie. Schreiben Sie etwas zu allen vier Punkten:</b>
+    <ul><li>Was es Neues bei Ihnen gibt</li><li>Was Sie selbst gerne in Ihrer Freizeit machen</li><li>Tipps für Sophie (wie man neue Leute kennenlernen kann)</li><li>Reaktion auf den Vorschlag (Wochenendbesuch)</li></ul>
+    <p style="font-size:.8rem;color:var(--mut);margin-top:.7rem"><b style="color:var(--txt2)">Vergessen Sie nicht Datum und Anrede. Mindestens 100 Wörter.</b></p>
+    </div></div>
+    <textarea id="wa1" rows="18" placeholder="" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" style="width:100%;background:var(--card);border:1px solid var(--bord);padding:1rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--txt);outline:none;resize:vertical;line-height:1.9;"></textarea>
+    <div style="display:flex;justify-content:space-between;margin-top:.3rem">
+      <span id="wc1" class="wc wlo">0 Wörter (Mindestens 100 Wörter)</span>
+      
+    </div>
+  </div><!-- /s2 -->
+
+  <div class="sp" id="s3">
+  <div style="text-align:center;padding:1.2rem 0 .5rem">
+    <button id="hvStartBtn" style="background:var(--blue);color:#fff;border:none;padding:.8rem 2.5rem;font-size:1rem;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:.03em;">▶ Hören starten</button>
+    <p id="hvStartNote" style="font-size:.8rem;color:var(--mut);margin:.4rem 0 0">Klicken Sie, um das Hörverstehen zu beginnen. Alle drei Teile spielen automatisch hintereinander.</p>
+  </div>
+    <div class="sh"><div class="sh-top"><h2 class="sh-title">4. Hörverstehen</h2><span class="pts">75 Pkt · ~30 Min</span></div><p class="sh-desc">Richtig (+) oder Falsch (–). Audio startet automatisch beim Öffnen dieser Sektion.</p></div>
+    <div class="sub-lbl">Teil 1 · Kurzaussagen <span class="sub-note">25 Pkt · 5×5 · Nur einmal · 30s Lesezeit</span></div>
+    <div class="tc"><div class="tc-meta" id="hv1-desc">Fünf Personen sprechen über das Thema Freizeit. Nur einmal. Jede Aussage wird mit Nummer angekündigt.</div><div class="tts-player" id="tts-hv1"><div class="tts-meta"><div class="tts-track" id="tts-track-hv1"></div><div class="tts-bar-wrap"><div class="tts-bar-fill" id="tts-fill-hv1" style="width:0%"></div></div></div><div class="tts-plays" id="tts-plays-hv1">Startet automatisch · nur 1×</div></div><div class="tts-read-box" id="tts-read-hv1" style="display:none"><div class="tts-read-label">📖 Lesezeit: <span id="tts-cd-hv1">30</span>s</div><div class="tts-cd-bar"><div class="tts-cd-fill" id="tts-cdf-hv1" style="width:100%"></div></div></div></div>
+    <div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="5"><div class="qn">AUFGABE 41 · Richtig oder Falsch?</div><div class="qt">Die junge Frau verbringt ihre Freizeit hauptsächlich mit Sport.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="5"><div class="qn">AUFGABE 42 · Richtig oder Falsch?</div><div class="qt">Der ältere Mann kocht in seiner Freizeit sehr gerne.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="5"><div class="qn">AUFGABE 43 · Richtig oder Falsch?</div><div class="qt">Die Frau mittleren Alters verbringt ihre Freizeit am liebsten in der Natur.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="5"><div class="qn">AUFGABE 44 · Richtig oder Falsch?</div><div class="qt">Der junge Mann macht in seiner Freizeit Musik.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="5"><div class="qn">AUFGABE 45 · Richtig oder Falsch?</div><div class="qt">Die Frau genießt ihre Freizeit am liebsten alleine zuhause.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div>
+    <div class="sub-lbl">Teil 2 · Interview <span class="sub-note">25 Pkt · 10×2,5 · 2× automatisch · 60s Lesezeit</span></div>
+    <div class="tc"><div class="tc-meta">Interview mit einer Köchin. Wird automatisch zweimal abgespielt mit Ansage dazwischen.</div><div class="tts-player" id="tts-hv2"><div class="tts-meta"><div class="tts-track" id="tts-track-hv2"></div><div class="tts-bar-wrap"><div class="tts-bar-fill" id="tts-fill-hv2" style="width:0%"></div></div></div><div class="tts-plays" id="tts-plays-hv2">Folgt automatisch · 2× ab</div></div><div class="tts-read-box" id="tts-read-hv2" style="display:none"><div class="tts-read-label">📖 Lesezeit: <span id="tts-cd-hv2">60</span>s</div><div class="tts-cd-bar"><div class="tts-cd-fill" id="tts-cdf-hv2" style="width:100%"></div></div></div></div>
+    <div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 46 · Richtig oder Falsch?</div><div class="qt">Maria Steinberg hat ihr Handwerk durch eine Ausbildung gelernt.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 47 · Richtig oder Falsch?</div><div class="qt">Sie arbeitet in einem Restaurant, das ihr selbst gehört.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 48 · Richtig oder Falsch?</div><div class="qt">Die Arbeitszeiten in der Gastronomie sind für sie ein Nachteil.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 49 · Richtig oder Falsch?</div><div class="qt">Maria kocht zuhause anders als in ihrem Restaurant.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 50 · Richtig oder Falsch?</div><div class="qt">Sie findet es wichtig, regionale Produkte zu verwenden.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 51 · Richtig oder Falsch?</div><div class="qt">Maria hat viele Mitarbeiter in ihrer Küche.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 52 · Richtig oder Falsch?</div><div class="qt">Sie möchte gerne mehr reisen, um neue Rezepte kennenzulernen.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 53 · Richtig oder Falsch?</div><div class="qt">Ihr Restaurant ist täglich geöffnet.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 54 · Richtig oder Falsch?</div><div class="qt">Maria ist mit dem Erfolg ihres Restaurants zufrieden.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="2.5"><div class="qn">AUFGABE 55 · Richtig oder Falsch?</div><div class="qt">Sie empfiehlt jungen Menschen, in der Gastronomie zu arbeiten.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div>
+    <div class="sub-lbl">Teil 3 · Durchsagen <span class="sub-note">25 Pkt · 5×5 · Je 2× · 30s Lesezeit</span></div>
+    <div class="tc"><div class="tc-meta">Fünf Durchsagen. Jede Durchsage zweimal, mit Nummer angekündigt.</div><div class="tts-player" id="tts-hv3"><div class="tts-meta"><div class="tts-track" id="tts-track-hv3"></div><div class="tts-bar-wrap"><div class="tts-bar-fill" id="tts-fill-hv3" style="width:0%"></div></div></div><div class="tts-plays" id="tts-plays-hv3">Folgt automatisch · 2× pro Durchsage</div></div><div class="tts-read-box" id="tts-read-hv3" style="display:none"><div class="tts-read-label">📖 Lesezeit: <span id="tts-cd-hv3">30</span>s</div><div class="tts-cd-bar"><div class="tts-cd-fill" id="tts-cdf-hv3" style="width:100%"></div></div></div></div>
+    <div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="5"><div class="qn">AUFGABE 56 · Richtig oder Falsch?</div><div class="qt">Der Zug nach Frankfurt hat zehn Minuten Verspätung.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="5"><div class="qn">AUFGABE 57 · Richtig oder Falsch?</div><div class="qt">Im Sportgeschäft gibt es heute dreißig Prozent auf Winterjacken.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="5"><div class="qn">AUFGABE 58 · Richtig oder Falsch?</div><div class="qt">Der Kurs beginnt zwei Wochen später als angekündigt.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="-" data-sec="3" data-pts="5"><div class="qn">AUFGABE 59 · Richtig oder Falsch?</div><div class="qt">Die Bibliothek ist am Wochenende geschlossen.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div><div class="qb" data-type="tf" data-cor="+" data-sec="3" data-pts="5"><div class="qn">AUFGABE 60 · Richtig oder Falsch?</div><div class="qt">Das Konzert findet in einem anderen Saal statt als geplant.</div><div class="rfw"><button class="rfb" data-v="richtig">+ Richtig</button><button class="rfb" data-v="falsch">– Falsch</button></div><div class="fb"></div></div>
+  </div><!-- /s3 -->
+
+  </div><!-- ebody -->
+  <div class="ef">
+    <span class="efi" id="efi">Teil 1 von 4 · Leseverstehen</span>
+    <div class="ebs">
+      
+      <button class="fb-btn pri" id="nextBtn">Weiter →</button>
+      <button class="fb-btn sub" id="subBtn" style="display:none">Abgeben ✓</button>
+    </div>
+  </div>
+</div><!-- /exam -->
+
+<div id="results" style="display:none">
+  <div class="rh" id="rh"><div class="rv" id="rv"></div><span class="rp" id="rpct"></span><p class="rm" id="rm"></p></div>
+  <div class="bg" id="bg"></div>
+  <div id="gScore"></div>
+  <div style="text-align:center;margin-top:1.5rem">
+    <button class="rb-btn" id="retryBtn" style="background:var(--card);border:1px solid var(--bord);color:var(--txt);padding:.7rem 1.5rem;cursor:pointer;font-size:.9rem">↺ Neu starten</button>
+    <button class="rb-btn" id="pdfBtn" style="background:var(--gold);border:none;color:#fff;padding:.7rem 1.5rem;cursor:pointer;font-size:.9rem;font-weight:600">Speichern / Drucken</button>
+  </div>
+</div>
+
+<
+
+<script>
+(function(){
+'use strict';
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function on(id,evt,fn){var e=document.getElementById(id);if(e)e.addEventListener(evt,fn);}
+
+// ── THEME ────────────────────────────────────────────────────────────────────
+var dark=false;
+function setTheme(d){
+  dark=d;
+  document.documentElement.setAttribute('data-theme',d?'dark':'light');
+  var l=d?'🌙 Dunkel':'☀️ Hell';
+  ['thBtn','thCoverBtn'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=l;});
+}
+
+// ── WIRING ───────────────────────────────────────────────────────────────────
+on('startBtn','click',startExam);
+on('nextBtn','click',function(){go(1);});
+on('subBtn','click',submitExam);
+on('retryBtn','click',function(){location.reload();});
+on('pdfBtn','click',exportPDF);
+on('genCoverBtn','click',function(){ saveVersion(); genQ('all'); });
+on('hvStartBtn','click',function(){hvStart();});
+// Set initial hv1 description (deferred so ACFG is ready)
+setTimeout(function(){
+  buildHV1Rule((typeof ACFG!=='undefined'&&ACFG.hv1&&ACFG.hv1.theme)||'Freizeit');
+  // Restore previously generated questions if available
+  if (restoreSavedQuestions()) {
+    var indicator = document.createElement('div');
+    indicator.style.cssText = 'position:fixed;bottom:1rem;right:1rem;background:var(--gold);color:#fff;padding:.4rem .9rem;font-size:.75rem;border-radius:3px;z-index:999;opacity:0.9';
+    indicator.textContent = '✓ Letzte Fragen wiederhergestellt';
+    document.body.appendChild(indicator);
+    setTimeout(function(){ if(indicator.parentNode) indicator.remove(); }, 3000);
+  }
+}, 100);
+
+on('thBtn','click',function(){setTheme(!dark);});
+on('thCoverBtn','click',function(){setTheme(!dark);});
+on('versionBtn','click',showVersionPanel);
+on('wa1','input',function(){wcUpdate('wa1','wc1');});
+
+
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click',function(){var t=parseInt(this.getAttribute('data-s'));if(t>=curS)goSec(t);});
+});
+
+
+// MCQ opts
+document.querySelectorAll('.opt').forEach(function(o){
+  o.addEventListener('click',function(){
+    if(done)return;
+    var nm=this.querySelector('input').name;
+    document.querySelectorAll('input[name="'+nm+'"]').forEach(function(r){r.closest('.opt').classList.remove('sel');});
+    this.classList.add('sel');
+    this.querySelector('input').checked=true;
+  });
+});
+
+// Richtig/Falsch buttons
+document.querySelectorAll('.rfb').forEach(function(b){
+  b.addEventListener('click',function(){
+    if(done)return;
+    var rfw=this.closest('.rfw');
+    if(!rfw)return;
+    rfw.querySelectorAll('.rfb').forEach(function(x){x.classList.remove('sel');});
+    this.classList.add('sel');
+  });
+});
+
+// Schreiben single textarea focus
+var wa1El=document.getElementById('wa1');
+if(wa1El){wa1El.addEventListener('focus',function(){this.style.borderColor='var(--gold)';});wa1El.addEventListener('blur',function(){this.style.borderColor='var(--bord)';});}
+
+// AI generator panel buttons
+document.querySelectorAll('.gsb').forEach(function(b){
+  b.addEventListener('click',function(){genQ(this.getAttribute('data-gen'));});
+});
+
+// ── TIMERS / STATE ───────────────────────────────────────────────────────────
+var TOTAL = 150*60;
+var tLeft = TOTAL;
+var ticker = null;
+var curS = 0;
+var done = false;
+var SNAMES = ['Leseverstehen','Sprachbausteine','Schreiben','Hörverstehen'];
+var sharedLesenLeft = 90*60;
+var hoerLeft = 30*60;
+var schreibLeft = 30*60;
+var secStarted = [false,false,false,false];
+var secAutoAdvanced = [false,false,false,false];
+
+function startExam(){
+  document.getElementById('cover').style.display='none';
+  document.getElementById('exam').style.display='block';
+  secStarted[0]=true;
+  ticker=setInterval(tick,1000);
+  updateFoot();
+  updateSecTimer();
+}
+
+function tick(){
+  tLeft--;
+  var m=String(Math.floor(tLeft/60)).padStart(2,'0'),s=String(tLeft%60).padStart(2,'0');
+  var el=document.getElementById('timer');
+  el.textContent=m+':'+s;
+  el.classList.toggle('warn',tLeft<=300);
+  document.getElementById('pbar').style.width=((TOTAL-tLeft)/TOTAL*100)+'%';
+
+  if(curS<=1 && secStarted[0]){
+    if(sharedLesenLeft>0){
+      sharedLesenLeft--;
+      updateSecTimerDisplay(sharedLesenLeft,90*60,'⏱ Lesen+Sprache');
+      if(sharedLesenLeft<=0 && !secAutoAdvanced[1]){
+        secAutoAdvanced[1]=true;
+        triggerSectionEnd('lesen',function(){goSec(2);});
+      }
+    }
+  } else if(curS===2 && secStarted[2]){
+    if(schreibLeft>0){
+      schreibLeft--;
+      updateSecTimerDisplay(schreibLeft,30*60,'⏱ Schreiben');
+      if(schreibLeft<=0 && !secAutoAdvanced[2]){
+        secAutoAdvanced[2]=true;
+        triggerSectionEnd('lesen',function(){goSec(3);});
+      }
+    }
+  } else if(curS===3 && secStarted[3]){
+    if(hoerLeft>0){
+      hoerLeft--;
+      updateSecTimerDisplay(hoerLeft,30*60,'⏱ Hörverstehen');
+      if(hoerLeft<=0 && !secAutoAdvanced[3]){
+        secAutoAdvanced[3]=true;
+        submitExam();
+      }
+    }
+  }
+
+  if(tLeft<=0 && !done) submitExam();
+}
+
+function updateSecTimerDisplay(left,total,lbl){
+  var el=document.getElementById('secTimer');
+  var m=String(Math.floor(left/60)).padStart(2,'0'),s=String(left%60).padStart(2,'0');
+  el.textContent=m+':'+s;
+  el.classList.toggle('warn',left<=120);
+  document.getElementById('secPbar').style.width=((total-left)/total*100)+'%';
+}
+
+function updateSecTimer(){
+  var lbl='',left=0,total=0;
+  if(curS<=1){lbl='Lesen+Sprache';left=sharedLesenLeft;total=90*60;}
+  else if(curS===2){lbl='Schreiben';left=schreibLeft;total=30*60;}
+  else{lbl='Hörverstehen';left=hoerLeft;total=30*60;}
+  document.getElementById('secTimerLbl').textContent=lbl;
+  updateSecTimerDisplay(left,total,'');
+}
+
+function triggerSectionEnd(fromSec,onDone){
+  var configs={
+    lesen:{icon:'📝',title:'Zeit für Lesen & Sprachbausteine ist abgelaufen!',
+      info:'Die 90 Minuten sind vorbei. Es geht weiter mit dem <b>Hörverstehen</b> (~30 Minuten).',
+      nextLabel:'2.1 Hörverstehen startet in:',delay:8},
+    hoeren:{icon:'🎧',title:'Hörverstehen abgeschlossen!',
+      info:'Die ~30 Minuten für das <b>Hörverstehen</b> sind abgelaufen. Es geht weiter mit dem <b>Schriftlichen Ausdruck</b> (30 Minuten).',
+      nextLabel:'Schreiben startet in:',delay:5}
+  };
+  var cfg=configs[fromSec];
+  if(!cfg){onDone();return;}
+  var overlay=document.createElement('div');
+  overlay.className='st-overlay';
+  overlay.innerHTML='<div class="st-icon">'+cfg.icon+'</div>'+
+    '<div class="st-title">'+cfg.title+'</div>'+
+    '<div class="st-info">'+cfg.info+'</div>'+
+    '<div class="st-timer-big" id="stCountdown">'+cfg.delay+'</div>'+
+    '<div class="st-bar-wrap"><div class="st-bar" id="stBar" style="width:100%"></div></div>'+
+    '<div class="st-next-info">'+cfg.nextLabel+'</div>';
+  document.body.appendChild(overlay);
+  var rem=cfg.delay;
+  var iv=setInterval(function(){
+    rem--;
+    var el=document.getElementById('stCountdown');
+    var bar=document.getElementById('stBar');
+    if(el)el.textContent=rem;
+    if(bar)bar.style.width=(rem/cfg.delay*100)+'%';
+    if(rem<=0){clearInterval(iv);document.body.removeChild(overlay);onDone();}
+  },1000);
+}
+
+function goSec(i){
+  document.querySelectorAll('.sp').forEach(function(p,x){p.classList.toggle('active',x===i);});
+  document.querySelectorAll('.tab').forEach(function(t,x){t.classList.toggle('active',x===i);});
+  curS=i;
+  document.getElementById('secLabel').textContent=SNAMES[i];
+  if(i===2){secStarted[2]=true;}
+  if(i===3){secStarted[3]=true;}
+  updateFoot();
+  updateSecTimer();
+  window.scrollTo(0,0);
+}
+function go(d){if(d>0){var n=curS+d;if(n<4)goSec(n);}}
+
+function updateFoot(){
+  document.getElementById('nextBtn').style.display=curS<3?'inline-block':'none';
+  document.getElementById('subBtn').style.display=curS===3?'inline-block':'none';
+  document.getElementById('efi').textContent='Teil '+(curS+1)+' von 4 · '+SNAMES[curS];
+}
+
+function wcUpdate(t,w){
+  var v=document.getElementById(t);
+  var wc=document.getElementById(w);
+  if(!v||!wc)return;
+  var words=v.value.trim().split(/\s+/).filter(function(x){return x.length>0;}).length;
+  wc.textContent=words+' Wörter (Mindestens 100 Wörter)';
+  wc.className='wc '+(words>=100?'wok':'wlo');
+}
+
+var FEMALE_NAMES = /anna|petra|marlene|helena|vicki|sarah|lisa|marie|katja|inga|klara|lena|hannah|julia|laura|sophie|monika|hedda|zira|female|weiblich/i;
+var MALE_NAMES   = /hans|stefan|yannick|markus|max|thomas|michael|peter|martin|daniel|männlich|male|mann|david|george|reed/i;
+
+var _allVoices    = [];
+var _deVoices     = [];
+var _femaleVoices = [];
+var _maleVoices   = [];
+var _voicesReady  = false;
+var _slots        = []; // indexed voice slots for consistent character assignment
+
+function _classifyVoices() {
+  if (!window.speechSynthesis) return;
+  var vs = window.speechSynthesis.getVoices();
+  if (!vs.length) return;
+  _allVoices = vs;
+  _deVoices  = vs.filter(function(v){ return v.lang && v.lang.startsWith('de'); });
+  if (!_deVoices.length) _deVoices = vs.slice(0, Math.min(4, vs.length));
+
+  _femaleVoices = _deVoices.filter(function(v){ return FEMALE_NAMES.test(v.name); });
+  _maleVoices   = _deVoices.filter(function(v){ return MALE_NAMES.test(v.name); });
+
+  // Fallback: if classification fails, split available voices by index
+  if (!_femaleVoices.length && !_maleVoices.length) {
+    var half = Math.ceil(_deVoices.length / 2);
+    _femaleVoices = _deVoices.slice(0, half);
+    _maleVoices   = _deVoices.slice(half).concat(_deVoices.slice(0,1));
+  } else if (!_femaleVoices.length) {
+    _femaleVoices = [_deVoices[0]];
+  } else if (!_maleVoices.length) {
+    _maleVoices = [_deVoices[_deVoices.length > 1 ? Math.floor(_deVoices.length/2) : 0]];
+  }
+
+  // Named slots: [0]=announcer(f) [1]=f1 [2]=f2 [3]=f3 [4]=m1 [5]=m2 [6]=moderator(f) [7]=guest(f)
+  var f = _femaleVoices, m = _maleVoices;
+  _slots = [
+    f[0],                              // 0: announcer
+    f[0],                              // 1: f1 – young woman (high pitch)
+    f[f.length>1 ? 1 : 0],             // 2: f2 – middle-aged woman
+    f[f.length>2 ? 2 : 0],             // 3: f3 – woman ~35
+    m[0],                              // 4: m1 – older man (low pitch)
+    m[m.length>1 ? 1 : 0],             // 5: m2 – young man
+    f[0],                              // 6: moderator
+    f[f.length>1 ? 1 : 0]             // 7: guest (Maria) – different from moderator
+  ];
+  _voicesReady = true;
+}
+
+function _ensureVoices() {
+  if (!_voicesReady || !_slots.length) _classifyVoices();
+}
+
+if (window.speechSynthesis) {
+  _classifyVoices();
+  window.speechSynthesis.addEventListener('voiceschanged', function(){
+    _voicesReady = false; _classifyVoices();
+  });
+}
+
+// Character profiles: pitch/rate per named role
+// Pitch manipulation is the KEY differentiator when only 1-2 voices are available
+var CHAR_PROFILES = {
+  announcer: { slot:0, pitch:1.04, rate:0.83 },
+  f1:        { slot:1, pitch:1.22, rate:0.91 },  // young woman – noticeably higher
+  f2:        { slot:2, pitch:1.08, rate:0.86 },  // middle-aged woman
+  f3:        { slot:3, pitch:1.15, rate:0.88 },  // woman ~35
+  m1:        { slot:4, pitch:0.80, rate:0.83 },  // older man – clearly lower + slower
+  m2:        { slot:5, pitch:0.92, rate:0.89 },  // young man
+  moderator: { slot:6, pitch:1.03, rate:0.91 },  // neutral/professional
+  guest:     { slot:7, pitch:1.18, rate:0.87 }   // Maria – warm female
+};
+
+function speakAs(charName, text, pauseBefore, pauseAfter) {
+  _ensureVoices();
+  var p = CHAR_PROFILES[charName] || CHAR_PROFILES.announcer;
+  var v = _slots[p.slot] || (_deVoices[0] || null);
+  return speak(text, { voice:v, pitch:p.pitch, rate:p.rate, vol:1.0,
+                       pauseBefore: pauseBefore||0, pauseAfter: pauseAfter||300 });
+}
+
+
+function speak(text, opts) {
+  return new Promise(function(resolve) {
+    if (!window.speechSynthesis) { resolve(); return; }
+    window.speechSynthesis.cancel();
+    setTimeout(function(){
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang   = 'de-DE';
+      u.rate   = opts.rate  || 0.88;
+      u.pitch  = opts.pitch || 1.0;
+      u.volume = opts.vol   || 1.0;
+      if (opts.voice) u.voice = opts.voice;
+      u.onend   = function(){ setTimeout(resolve, opts.pauseAfter || 250); };
+      u.onerror = function(){ setTimeout(resolve, 200); };
+      window.speechSynthesis.speak(u);
+    }, opts.pauseBefore || 0);
+  });
+}
+
+function pause(ms) {
+  return new Promise(function(r){ setTimeout(r, ms); });
+}
+
+// German number words for announcing question numbers
+var NUM_WORDS = {
+  41:'einundvierzig', 42:'zweiundvierzig', 43:'dreiundvierzig',
+  44:'vierundvierzig', 45:'fünfundvierzig',
+  46:'sechsundvierzig', 47:'siebenundvierzig', 48:'achtundvierzig',
+  49:'neunundvierzig',  50:'fünfzig',
+  51:'einundfünfzig',   52:'zweiundfünfzig',   53:'dreiundfünfzig',
+  54:'vierundfünfzig',  55:'fünfundfünfzig',
+  56:'sechsundfünfzig', 57:'siebenundfünfzig', 58:'achtundfünfzig',
+  59:'neunundfünfzig',  60:'sechzig'
+};
+
+// ── STATUS HELPERS ──────────────────────────────────────────────────────────
+function setTrack(id, txt) {
+  var el = document.getElementById('tts-track-' + id);
+  if (el) el.textContent = txt;
+}
+function setFill(id, pct) {
+  var el = document.getElementById('tts-fill-' + id);
+  if (el) el.style.width = pct + '%';
+}
+function setBtn(id, txt, disabled, playing) {
+  var el = document.getElementById('tts-btn-' + id);
+  if (!el) return;
+  el.textContent = txt;
+  el.disabled = !!disabled;
+  el.classList.toggle('playing', !!playing);
+}
+function setPlays(id, txt) {
+  var el = document.getElementById('tts-plays-' + id);
+  if (el) el.textContent = txt;
+}
+function showReadbox(id, show) {
+  var el = document.getElementById('tts-read-' + id);
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+function setCountdown(id, val, total) {
+  var numEl = document.getElementById('tts-cd-' + id);
+  var fillEl = document.getElementById('tts-cdf-' + id);
+  if (numEl) numEl.textContent = val;
+  if (fillEl) fillEl.style.width = (val / total * 100) + '%';
+}
+
+// ── READTIME COUNTDOWN ──────────────────────────────────────────────────────
+function runReadtime(id, secs) {
+  return new Promise(function(resolve) {
+    showReadbox(id, true);
+    setCountdown(id, secs, secs);
+    var rem = secs;
+    var iv = setInterval(function(){
+      rem--;
+      setCountdown(id, rem, secs);
+      setBtn(id, '⏳ Lesezeit: ' + rem + 's', true, false);
+      if (rem <= 0) {
+        clearInterval(iv);
+        showReadbox(id, false);
+        resolve();
+      }
+    }, 1000);
+  });
+}
+
+// ── TEIL 1: KURZAUSSAGEN ─────────────────────────────────────────────────────
+// Each speaker announced by number, then played. Only once.
+// ── AMBIENT SOUND ENGINE ──────────────────────────────────────────────────────
+// Synthesizes realistic location-specific ambient sounds using Web Audio API.
+// No external URLs - works offline, no CORS issues, guaranteed to play.
+
+var _ac = null;          // AudioContext
+var _ambTimers = [];     // setTimeout IDs for scheduled events
+var _ambNodes  = [];     // running AudioNodes to stop later
+var _ambActive = false;
+
+function _getAC() {
+  if (!_ac) {
+    try { _ac = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { return null; }
+  }
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+
+function _stopAmbient() {
+  _ambActive = false;
+  _ambTimers.forEach(function(t){ clearTimeout(t); });
+  _ambTimers = [];
+  _ambNodes.forEach(function(n){ try { n.stop(0); } catch(e){} });
+  _ambNodes = [];
+}
+
+// ── Core audio primitives ──────────────────────────────────────────────────────
+
+// Continuous filtered noise layer
+function _noiseLayer(ac, loHz, hiHz, gainVal, dest) {
+  var rate   = ac.sampleRate;
+  var bufLen = rate * 4; // 4-second looping buffer
+  var buf    = ac.createBuffer(2, bufLen, rate);
+  for (var ch = 0; ch < 2; ch++) {
+    var d = buf.getChannelData(ch);
+    // Pink-ish noise: random walk is more natural than white noise
+    var prev = 0;
+    for (var i = 0; i < bufLen; i++) {
+      prev += (Math.random() * 2 - 1) * 0.1;
+      prev  = Math.max(-1, Math.min(1, prev));
+      d[i]  = prev;
+    }
+  }
+  var src  = ac.createBufferSource();
+  src.buffer = buf; src.loop = true;
+  // Band-pass the noise to the target frequency range
+  var hp = ac.createBiquadFilter(); hp.type = 'highpass';  hp.frequency.value = loHz; hp.Q.value = 0.5;
+  var lp = ac.createBiquadFilter(); lp.type = 'lowpass';   lp.frequency.value = hiHz; lp.Q.value = 0.5;
+  var g  = ac.createGain();         g.gain.value = gainVal;
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(dest);
+  src.start();
+  _ambNodes.push(src);
+  return { src: src, gain: g };
+}
+
+// Steady tone
+function _tone(ac, freq, type, gainVal, dest) {
+  var osc = ac.createOscillator();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  var g = ac.createGain(); g.gain.value = gainVal;
+  osc.connect(g); g.connect(dest);
+  osc.start();
+  _ambNodes.push(osc);
+  return { osc: osc, gain: g };
+}
+
+// Slow LFO that wobbles a gain node — creates organic swelling
+function _lfo(ac, gainNode, rateHz, depthFraction) {
+  var lfo = ac.createOscillator();
+  lfo.type = 'sine'; lfo.frequency.value = rateHz;
+  var lfoG = ac.createGain(); lfoG.gain.value = depthFraction;
+  lfo.connect(lfoG); lfoG.connect(gainNode.gain);
+  lfo.start();
+  _ambNodes.push(lfo);
+}
+
+// One-shot event: shaped noise burst (footstep, page turn, seat creak etc.)
+function _burst(ac, loHz, hiHz, gainVal, durationSec, dest) {
+  var rate   = ac.sampleRate;
+  var len    = Math.ceil(rate * durationSec);
+  var buf    = ac.createBuffer(1, len, rate);
+  var d      = buf.getChannelData(0);
+  for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  var src    = ac.createBufferSource(); src.buffer = buf;
+  var hp     = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = loHz;
+  var lp     = ac.createBiquadFilter(); lp.type = 'lowpass';  lp.frequency.value = hiHz;
+  var g      = ac.createGain(); g.gain.setValueAtTime(0, ac.currentTime);
+  g.gain.linearRampToValueAtTime(gainVal, ac.currentTime + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + durationSec);
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(dest);
+  src.start();
+  // Don't push to _ambNodes - it auto-stops
+  return src;
+}
+
+// PA/bell chime (two descending tones)
+function _paChime(ac, dest) {
+  [880, 660].forEach(function(freq, idx) {
+    var t   = ac.currentTime + idx * 0.35;
+    var osc = ac.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq;
+    var g   = ac.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.18, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.0);
+    osc.connect(g); g.connect(dest);
+    osc.start(t); osc.stop(t + 2.1);
+  });
+}
+
+// Schedule a random event repeatedly while ambient is active
+function _scheduleRandom(fn, minMs, maxMs) {
+  if (!_ambActive) return;
+  var delay = minMs + Math.random() * (maxMs - minMs);
+  var t = setTimeout(function() {
+    if (_ambActive) { fn(); _scheduleRandom(fn, minMs, maxMs); }
+  }, delay);
+  _ambTimers.push(t);
+}
+
+// ── Location-specific ambient builders ────────────────────────────────────────
+
+function _buildBahnhof(ac, out) {
+  // Layer 1: deep infrastructure rumble (train + building vibration)
+  var rumble = _noiseLayer(ac, 20,  90,  0.20, out);
+  // Layer 2: mid-frequency train/platform hum
+  var train  = _noiseLayer(ac, 80,  250, 0.12, out);
+  // Layer 3: crowd at distance — speech frequency range
+  var crowd  = _noiseLayer(ac, 250, 900, 0.10, out);
+  // Layer 4: high-end echo / reverb tail of the large space
+  var echo   = _noiseLayer(ac, 900, 3000,0.05, out);
+  // HVAC blower
+  _tone(ac, 120, 'sawtooth', 0.025, out);
+  // Crowd swells organically
+  _lfo(ac, crowd.gain, 0.07, 0.04);
+  _lfo(ac, train.gain, 0.04, 0.03);
+  // PA chime at start + ~4s
+  _paChime(ac, out);
+  _ambTimers.push(setTimeout(function(){ if(_ambActive) _paChime(ac, out); }, 4200));
+  // Occasional sharp metallic click (rail joint / door)
+  _scheduleRandom(function(){ _burst(ac, 800, 3000, 0.12, 0.08, out); }, 1500, 4000);
+  // Occasional announcement-like noise burst
+  _scheduleRandom(function(){ _burst(ac, 200, 1500, 0.08, 0.6, out); }, 5000, 12000);
+}
+
+function _buildKaufhaus(ac, out) {
+  // HVAC system: the defining sound of any shop
+  _tone(ac, 105, 'sawtooth', 0.055, out);
+  _tone(ac, 210, 'sawtooth', 0.035, out);
+  _tone(ac, 55,  'sine',     0.045, out);
+  // Ventilation hiss
+  var hvac = _noiseLayer(ac, 2000, 6000, 0.04, out);
+  // Shopping crowd: continuous low-level chatter
+  var crowd = _noiseLayer(ac, 200, 900,  0.09, out);
+  var crowd2= _noiseLayer(ac, 500, 2000, 0.06, out);
+  _lfo(ac, crowd.gain,  0.11, 0.03);
+  _lfo(ac, crowd2.gain, 0.17, 0.02);
+  // Background muzak: simple repeating tone sequence
+  var notes = [330, 392, 440, 392, 349, 330];
+  var noteIdx = 0;
+  function playMuzak() {
+    if (!_ambActive) return;
+    var freq = notes[noteIdx % notes.length]; noteIdx++;
+    var osc = ac.createOscillator(); osc.type = 'triangle'; osc.frequency.value = freq;
+    var g   = ac.createGain();
+    g.gain.setValueAtTime(0, ac.currentTime);
+    g.gain.linearRampToValueAtTime(0.022, ac.currentTime + 0.05);
+    g.gain.setValueAtTime(0.022, ac.currentTime + 0.35);
+    g.gain.linearRampToValueAtTime(0, ac.currentTime + 0.45);
+    osc.connect(g); g.connect(out); osc.start(); osc.stop(ac.currentTime + 0.5);
+    var t = setTimeout(playMuzak, 480);
+    _ambTimers.push(t);
+  }
+  setTimeout(playMuzak, 200);
+  // Occasional cash register beep
+  _scheduleRandom(function(){
+    var o=ac.createOscillator();o.frequency.value=1200;
+    var g=ac.createGain();g.gain.setValueAtTime(0.06,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+0.15);
+    o.connect(g);g.connect(out);o.start();o.stop(ac.currentTime+0.16);
+  }, 3000, 8000);
+}
+
+function _buildSchule(ac, out) {
+  // Building hum
+  _tone(ac, 100, 'sine', 0.03, out);
+  // Corridor: children voices (high-pitched chatter)
+  var kids  = _noiseLayer(ac, 500, 2500, 0.09, out);
+  var kids2 = _noiseLayer(ac, 800, 3500, 0.06, out);
+  // Room tone (voices through wall)
+  var room  = _noiseLayer(ac, 150, 600,  0.07, out);
+  _lfo(ac, kids.gain,  0.25, 0.04);
+  _lfo(ac, kids2.gain, 0.35, 0.03);
+  _lfo(ac, room.gain,  0.09, 0.025);
+  // Occasional footstep burst
+  _scheduleRandom(function(){ _burst(ac, 100, 500, 0.10, 0.15, out); }, 800, 2500);
+  // Occasional louder voice (child shouting)
+  _scheduleRandom(function(){ _burst(ac, 600, 3000, 0.14, 0.4, out); }, 2000, 5000);
+  // Door slam
+  _scheduleRandom(function(){ _burst(ac, 50, 400, 0.20, 0.12, out); }, 4000, 10000);
+}
+
+function _buildBibliothek(ac, out) {
+  // Libraries are QUIET — mostly HVAC and near-silence
+  // Fluorescent light hum
+  _tone(ac, 120, 'sine', 0.022, out);
+  _tone(ac, 60,  'sine', 0.018, out);
+  // Very soft AC hiss
+  var ac_hiss = _noiseLayer(ac, 2000, 8000, 0.025, out);
+  // Near-inaudible room tone
+  var room    = _noiseLayer(ac, 80,   300,  0.018, out);
+  // Occasional page turn (crisp high-frequency burst)
+  _scheduleRandom(function(){ _burst(ac, 1500, 5000, 0.08, 0.05, out); }, 1500, 4000);
+  // Occasional chair creak (low, short)
+  _scheduleRandom(function(){ _burst(ac, 80, 300, 0.09, 0.18, out); }, 3000, 8000);
+  // Very occasional distant cough
+  _scheduleRandom(function(){ _burst(ac, 200, 800, 0.06, 0.35, out); }, 6000, 15000);
+}
+
+function _buildKonzertsaal(ac, out) {
+  // Audience murmur before concert: the defining sound
+  var murmur1 = _noiseLayer(ac, 150, 600,  0.15, out);
+  var murmur2 = _noiseLayer(ac, 400, 1200, 0.10, out);
+  var murmur3 = _noiseLayer(ac, 800, 2500, 0.06, out);
+  // Deep room resonance — large reverberant hall
+  _tone(ac, 55,  'sine', 0.040, out);
+  _tone(ac, 110, 'sine', 0.025, out);
+  // High shimmer of the reflective surfaces
+  var shimmer = _noiseLayer(ac, 3000, 8000, 0.03, out);
+  // Organic audience breathing/swelling
+  _lfo(ac, murmur1.gain, 0.06, 0.05);
+  _lfo(ac, murmur2.gain, 0.09, 0.04);
+  _lfo(ac, murmur3.gain, 0.13, 0.025);
+  // Occasional cough
+  _scheduleRandom(function(){ _burst(ac, 200, 800, 0.10, 0.3, out); }, 2000, 6000);
+  // Occasional seat movement
+  _scheduleRandom(function(){ _burst(ac, 50, 300, 0.08, 0.2, out); }, 3000, 9000);
+  // Occasional louder voice / laugh
+  _scheduleRandom(function(){ _burst(ac, 300, 1500, 0.09, 0.5, out); }, 4000, 10000);
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────────
+function startAmbient(contextType) {
+  _stopAmbient();
+  var ac = _getAC();
+  if (!ac) return;
+
+  // Master gain: overall volume — quiet background, not intrusive
+  var master = ac.createGain();
+  master.gain.value = 0.32;  // overall mix level
+  master.connect(ac.destination);
+  _ambNodes.push(master);
+  _ambActive = true;
+
+  // Fade master in over 0.8s
+  master.gain.setValueAtTime(0, ac.currentTime);
+  master.gain.linearRampToValueAtTime(0.32, ac.currentTime + 0.8);
+
+  if      (contextType === 'bahnhof')    _buildBahnhof(ac, master);
+  else if (contextType === 'kaufhaus')   _buildKaufhaus(ac, master);
+  else if (contextType === 'schule')     _buildSchule(ac, master);
+  else if (contextType === 'bibliothek') _buildBibliothek(ac, master);
+  else if (contextType === 'konzertsaal')_buildKonzertsaal(ac, master);
+}
+
+
+async function playHV1(c) {
+  var total = c.texts.length; // array of {num, text, speaker, rate, pitch}
+  for (var i = 0; i < total; i++) {
+    var item = c.texts[i];
+    var numWord = NUM_WORDS[item.num] || String(item.num);
+    setTrack('hv1', 'Aussage ' + numWord + ' (' + (i+1) + '/' + total + ')');
+    setFill('hv1', (i / total) * 100);
+    // Announce the number (neutral announcer voice)
+    await speak('Nummer ' + numWord + '.', {
+      rate: 0.82, pitch: 1.0, vol: 1.0,
+      voice: _slots[0] || (_deVoices[0]||null),
+      pauseAfter: 800
+    });
+    await pause(400);
+    // Play the speaker text
+    // Use distinct pitch per speaker index for clear differentiation
+    var pitchArr = [1.20, 0.78, 1.08, 0.88, 1.14];
+    var rateArr  = [0.90, 0.83, 0.87, 0.89, 0.88];
+    await speak(item.text, {
+      voice: (item.speaker==='female') ? (_slots[1]||_deVoices[0]||null) : (_slots[4]||_deVoices[0]||null),
+      pitch: pitchArr[i % 5], rate: rateArr[i % 5], vol:1.0,
+      pauseBefore:0, pauseAfter:1400
+    });
+    await pause(600);
+  }
+  setFill('hv1', 100);
+  setTrack('hv1', '✅ Teil 1 vollständig abgespielt');
+  setBtn('hv1', '✅ Abgespielt', true, false);
+  setPlays('hv1', 'Nicht mehr abspielbar');
+}
+
+// ── TEIL 2: INTERVIEW ────────────────────────────────────────────────────────
+// Natural interview: moderator + guest alternate voices, plays twice
+async function playHV2once(c, playNum) {
+  var dlg = c.texts; // [{speaker:'moderator'|'guest', text, rate, pitch}]
+  var total = dlg.length;
+  var modVoice   = _slots[6] || (_deVoices[0]||null);  // moderator
+  var guestVoice = _slots[7] || (_deVoices[0]||null);  // guest
+
+  for (var i = 0; i < total; i++) {
+    var line = dlg[i];
+    var isMod = (line.speaker === 'moderator');
+    setTrack('hv2', (isMod ? '🎙 Moderatorin' : '👩‍🍳 Maria Steinberg') +
+             ' (' + (i+1) + '/' + total + ')');
+    setFill('hv2', (i / total) * 100);
+
+    var voice = isMod ? modVoice : guestVoice;
+    // Slight variations to sound more natural
+    var rate  = isMod ? 0.91 + (Math.random()*0.03) : 0.84 + (Math.random()*0.03);
+    var pitch = isMod ? 1.15 + (Math.random()*0.05) : 0.82 + (Math.random()*0.05);
+
+    await speak(line.text, {
+      rate: rate, pitch: pitch, vol: 1.0, voice: voice,
+      pauseBefore: isMod ? 300 : 150,
+      pauseAfter: isMod ? 400 : 600  // guest gets longer pause (thinking)
+    });
+  }
+}
+
+async function playHV2(c) {
+  c.busy = true;
+  setBtn('hv2', '🔊 Interview läuft (1/2)...', true, true);
+  setPlays('hv2', '2. Wiedergabe folgt automatisch');
+
+  // First play
+  await playHV2once(c, 1);
+  setFill('hv2', 100);
+
+  await pause(800);
+
+  // Announcement between plays
+  setTrack('hv2', '🔁 Das Gespräch wird jetzt wiederholt...');
+  await speak('Das Gespräch wird jetzt ein zweites Mal abgespielt.', {
+    rate: 0.82, pitch: 1.0, vol: 1.0,
+    voice: _slots[0] || (_deVoices[0]||null), pauseAfter: 1200
+  });
+
+  // Second play
+  setBtn('hv2', '🔊 Interview läuft (2/2)...', true, true);
+  setFill('hv2', 0);
+  await playHV2once(c, 2);
+  setFill('hv2', 100);
+
+  c.plays = 2; c.busy = false;
+  setBtn('hv2', '✅ Interview abgespielt', true, false);
+  setTrack('hv2', '✅ Interview zweimal abgespielt');
+  setPlays('hv2', 'Vollständig abgespielt');
+}
+
+// ── TEIL 3: DURCHSAGEN ───────────────────────────────────────────────────────
+// Each announcement: announce number, play once, short pause, play again, then next
+async function playHV3(c) {
+  var total = c.texts.length;
+  var announcerVoice = _slots[0] || (_deVoices[0]||null);
+  // Start ambient for first item context
+  if (c.texts[0] && c.texts[0].context) startAmbient(c.texts[0].context);
+
+  for (var i = 0; i < total; i++) {
+    var item = c.texts[i];
+    // Switch ambient per announcement location
+    if (item.context) startAmbient(item.context);
+    var numWord = NUM_WORDS[item.num] || String(item.num);
+    setTrack('hv3', 'Durchsage ' + numWord + ' (' + (i+1) + '/' + total + ')');
+    setFill('hv3', (i / total) * 100);
+
+    // Announce question number
+    await speak('Aufgabe ' + numWord + '.', {
+      rate: 0.80, pitch: 1.0, vol: 1.0,
+      voice: announcerVoice, pauseAfter: 700
+    });
+
+    // Determine voice style based on type of announcement
+    var annVoice = _slots[0] || (_deVoices[0]||null);
+    var ctxPitch = {bahnhof:0.92, kaufhaus:1.05, schule:1.08, bibliothek:0.95, konzertsaal:0.90};
+    var annRate  = item.rate || 0.83;
+    var annPitch = ctxPitch[item.context] || item.pitch || 0.95;
+
+    // First play
+    await speak(item.text, {
+      rate: annRate, pitch: annPitch, vol: 1.0,
+      voice: annVoice, pauseAfter: 900
+    });
+
+    await pause(500);
+
+    // Announce repeat
+    await speak('Noch einmal.', {
+      rate: 0.82, pitch: 1.0, vol: 1.0,
+      voice: announcerVoice, pauseAfter: 600
+    });
+
+    // Second play (slightly different rate for naturalness)
+    await speak(item.text, {
+      rate: annRate - 0.02, pitch: annPitch, vol: 1.0,
+      voice: annVoice, pauseAfter: 1400
+    });
+
+    await pause(800);
+  }
+  _stopAmbient();
+  setFill('hv3', 100);
+  setTrack('hv3', '✅ Alle Durchsagen zweimal abgespielt');
+  setBtn('hv3', '✅ Abgespielt', true, false);
+  setPlays('hv3', 'Vollständig abgespielt');
+}
+
+// ── MAIN TTS START ───────────────────────────────────────────────────────────
+function ttsStart(id) {
+  var c = ACFG[id];
+  if (!c || c.busy || c.plays >= c.maxP) return;
+  if (c.started) return; // prevent double-start
+  c.busy = true; c.started = true;
+
+  setBtn(id, '📢 Anweisung...', true, false);
+  setTrack(id, 'Anweisung wird vorgelesen...');
+
+  speak(c.rule, { rate: 0.84, pitch: 1.0, voice: _slots[0] || (_deVoices[0]||null), pauseAfter: 600 })
+  .then(function(){
+    setBtn(id, '⏳ Lesezeit: ' + c.rsecs + 's', true, false);
+    setTrack(id, '📖 Lesen Sie jetzt die Aufgaben!');
+    return runReadtime(id, c.rsecs);
+  })
+  .then(function(){
+    setBtn(id, '🔊 Läuft...', true, true);
+    if (id === 'hv1') return playHV1(c);
+    if (id === 'hv2') return playHV2(c);
+    if (id === 'hv3') return playHV3(c);
+  })
+  .catch(function(e){
+    setTrack(id, '⚠ Fehler: ' + e);
+    c.busy = false;
+  });
+}
+
+function audioStart(id) { ttsStart(id); }
+
+// Kept for compatibility with genQ TTS (AI generator section)
+function speakOne(txt, rate, alt, cb) {
+  speak(txt, {
+    rate: rate || 0.88,
+    pitch: alt ? 1.12 : 0.94,
+    voice: alt ? _slots[7] || (_deVoices[0]||null) : _slots[0] || (_deVoices[0]||null),
+    pauseAfter: 300
+  }).then(function(){ if(cb) cb(); });
+}
+
+
+// ── SUBMIT / SCORE ───────────────────────────────────────────────────────────
+
+function exportPDF() {
+  var sc = [0,0,0,0];
+
+  document.querySelectorAll('.qb[data-type="mcq"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'), si=parseInt(b.getAttribute('data-sec')), pts=parseFloat(b.getAttribute('data-pts'))||0;
+    var sel=null; b.querySelectorAll('input[type=radio]').forEach(function(r){if(r.checked)sel=r.value;});
+    if(sel===cor) sc[si]+=pts;
+  });
+  document.querySelectorAll('.qb[data-type="tf"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'), si=parseInt(b.getAttribute('data-sec')), pts=parseFloat(b.getAttribute('data-pts'))||0;
+    var sb=b.querySelector('.rfb.sel'), sv=sb?sb.getAttribute('data-v'):null;
+    var corVal=cor==='+'?'richtig':'falsch';
+    if(sv===corVal) sc[si]+=pts;
+  });
+  document.querySelectorAll('.t1-item').forEach(function(item){
+    var cor=item.dataset.cor, chosen=item.dataset.chosen||'', pts=parseFloat(item.dataset.pts)||5;
+    if(chosen===cor) sc[0]+=pts;
+  });
+  document.querySelectorAll('.t3-sit').forEach(function(sit){
+    var cor=sit.dataset.cor, chosen=sit.dataset.chosen||'', pts=parseFloat(sit.dataset.pts)||0;
+    if(pts>0&&chosen===cor) sc[0]+=pts;
+  });
+  document.querySelectorAll('.wb-gap').forEach(function(gap){
+    if(gap.dataset.chosen===gap.dataset.cor) sc[1]+=1.5;
+  });
+
+  var tot=sc[0]+sc[1]+sc[3], pct=Math.round(tot/180*100), pass=tot>=108;
+  var ts=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var passColor = pass?'#1a7a3c':'#c0392b';
+  var passBg    = pass?'#eafbea':'#fbeaea';
+
+  function row(ok, label, chosen, correct, extra) {
+    return '<tr style="background:'+(ok?'#f0fff0':'#fff0f0')+'">'
+      +'<td style="padding:.25rem .4rem;font-size:.75rem;width:20px;text-align:center;font-weight:700;color:'+(ok?'#1a7a3c':'#c0392b')+'">'+(ok?'✓':'✗')+'</td>'
+      +'<td style="padding:.25rem .4rem;font-size:.75rem">'+label+'</td>'
+      +'<td style="padding:.25rem .4rem;font-size:.75rem">'+chosen+'</td>'
+      +'<td style="padding:.25rem .4rem;font-size:.75rem;font-weight:700">'+correct+'</td>'
+      +(extra!==undefined?'<td style="padding:.25rem .4rem;font-size:.75rem;color:#888">'+extra+'</td>':'')
+      +'</tr>';
+  }
+  function section(title) {
+    return '<tr><td colspan="5" style="background:#f5f0e8;padding:.35rem .5rem;font-size:.8rem;font-weight:700;color:#7a5c1e;border-top:2px solid #d4a843">'+title+'</td></tr>';
+  }
+
+  var rows = '';
+
+  // T1
+  rows += section('1.1 Leseverstehen Teil 1 – Globalverstehen');
+  document.querySelectorAll('.t1-item').forEach(function(item){
+    var cor=item.dataset.cor, chosen=item.dataset.chosen||'–', q=item.dataset.q.replace('t1-','Text ');
+    var body=item.querySelector('.t1-body p'); var txt=body?body.textContent.slice(0,60)+'...':'';
+    rows += row(chosen===cor, q+': '+txt, chosen.toUpperCase(), cor.toUpperCase());
+  });
+
+  // T2
+  rows += section('1.1 Leseverstehen Teil 2 – Detailverstehen');
+  document.querySelectorAll('.qb[data-type="mcq"][data-sec="0"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'), qn=b.querySelector('.qn'), qt=b.querySelector('.qt');
+    var sel=null; b.querySelectorAll('input[type=radio]').forEach(function(r){if(r.checked)sel=r.value;});
+    var opts={}; b.querySelectorAll('.opt').forEach(function(o){opts[o.querySelector('input').value]=o.textContent.trim().slice(1).trim();});
+    rows += row(sel===cor, (qn?qn.textContent:'')+(qt?' – '+qt.textContent.slice(0,50)+'...':''), (opts[sel]||sel||'–'), (opts[cor]||cor));
+  });
+
+  // T3
+  rows += section('1.1 Leseverstehen Teil 3 – Selektives Verstehen');
+  document.querySelectorAll('.t3-sit').forEach(function(sit){
+    var cor=sit.dataset.cor, chosen=sit.dataset.chosen||'–', pts=parseFloat(sit.dataset.pts)||0;
+    var txt=sit.querySelector('.t3-sit-text');
+    rows += row(chosen===cor, 'Sit.'+sit.dataset.q+(pts===0?' (unbewertet)':' ★')+': '+(txt?txt.textContent.slice(0,50)+'...':''), chosen.toUpperCase(), cor.toUpperCase());
+  });
+
+  // SB1
+  rows += section('1.2 Sprachbausteine Teil 1 – Grammatik');
+  document.querySelectorAll('.qb[data-type="mcq"][data-sec="1"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'), qn=b.querySelector('.qn');
+    var sel=null; b.querySelectorAll('input[type=radio]').forEach(function(r){if(r.checked)sel=r.value;});
+    var opts={}; b.querySelectorAll('.opt').forEach(function(o){opts[o.querySelector('input').value]=o.textContent.trim().slice(1).trim();});
+    rows += row(sel===cor, (qn?qn.textContent:''), (opts[sel]||sel||'–'), (opts[cor]||cor));
+  });
+
+  // SB2
+  rows += section('1.2 Sprachbausteine Teil 2 – Lexik');
+  document.querySelectorAll('.wb-gap').forEach(function(gap){
+    var cor=gap.dataset.cor, chosen=gap.dataset.chosen||'–', gn=gap.dataset.gap;
+    var corW=document.querySelector('.wb-word[data-letter="'+cor+'"]');
+    var choW=document.querySelector('.wb-word[data-letter="'+chosen+'"]');
+    function wbWord(el,fb){ if(!el)return fb.toUpperCase(); var lbl=el.querySelector('.wb-lbl'); return (lbl?el.textContent.replace(lbl.textContent,''):el.textContent).trim().toUpperCase(); }
+    rows += row(chosen===cor, 'Lücke '+gn, wbWord(choW,chosen), wbWord(corW,cor));
+  });
+
+  // HV
+  rows += section('2.1 Hörverstehen');
+  document.querySelectorAll('.qb[data-type="tf"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'), qn=b.querySelector('.qn'), qt=b.querySelector('.qt');
+    var sb=b.querySelector('.rfb.sel'), sv=sb?sb.getAttribute('data-v'):null;
+    var corVal=cor==='+'?'Richtig':'Falsch';
+    rows += row(sv===corVal.toLowerCase(), (qn?qn.textContent.split('·')[0].trim():'')+': '+(qt?qt.textContent.slice(0,55)+'...':''), sv?sv.charAt(0).toUpperCase()+sv.slice(1):'–', corVal);
+  });
+
+  // Schreiben
+  var wa=document.getElementById('wa1'), wc=document.getElementById('wc1');
+  var schText = wa&&wa.value ? wa.value.replace(/&/g,'&amp;').replace(/</g,'&lt;') : '(kein Text eingegeben)';
+
+  var html = '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">'
+    +'<title>TELC B1 Ergebnis '+ts+'</title>'
+    +'<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:Arial,sans-serif;color:#1a1a1a;padding:1.5rem;max-width:820px;margin:0 auto;font-size:14px}'
+    +'.brand{text-align:center;padding-bottom:.8rem;border-bottom:3px solid #b8922a;margin-bottom:1rem}'
+    +'.brand h1{font-size:2rem;font-weight:900;letter-spacing:2px;color:#1a1a1a}'
+    +'.brand h1 span{color:#b8922a}'
+    +'.brand p{font-size:.65rem;letter-spacing:4px;color:#888;margin-top:.2rem}'
+    +'.rbox{border:2px solid '+passColor+';padding:1rem;margin:.8rem 0;text-align:center;background:'+passBg+'}'
+    +'.rbox .v{font-size:1.5rem;font-weight:900;color:'+passColor+'}'
+    +'.rbox .s{font-size:1rem;font-weight:600;margin:.2rem 0}'
+    +'.rbox .d{font-size:.75rem;color:#666}'
+    +'.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.8rem 0}'
+    +'.sc{border:1px solid #ddd;padding:.5rem;text-align:center;border-radius:3px}'
+    +'.sc .n{font-size:1.2rem;font-weight:900;color:#b8922a}'
+    +'.sc .m{font-size:.65rem;color:#b8922a}'
+    +'.sc .l{font-size:.6rem;color:#888;margin-top:.1rem}'
+    +'table{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.75rem}'
+    +'th{background:#b8922a;color:#fff;padding:.3rem .5rem;text-align:left;font-size:.7rem}'
+    +'.schtext{background:#f9f9f9;border:1px solid #ddd;padding:.6rem;font-size:.75rem;line-height:1.6;white-space:pre-wrap;margin:.3rem 0}'
+    +'.tip{background:#fff8e1;border:1px solid #f0c040;padding:.5rem .8rem;font-size:.75rem;text-align:center;margin:.8rem 0;border-radius:3px}'
+    +'.foot{text-align:center;margin-top:1.5rem;font-size:.65rem;color:#aaa;border-top:1px solid #eee;padding-top:.5rem}'
+    +'@media print{.tip{display:none}}'
+    +'</style></head><body>'
+    // Brand
+    +'<div class="brand"><h1>TEL<span>C</span> B1</h1><p>MANISH\'S PR\u00dcFUNGSSIMULATION</p></div>'
+    // Print tip
+    +'<div class="tip">\uD83D\uDCA1 <b>PDF speichern:</b> Datei \u2192 Drucken \u2192 &ldquo;Als PDF speichern&rdquo; w\u00e4hlen. Diese Hinweisbox erscheint nicht im Druck.</div>'
+    // Result
+    +'<div class="rbox"><div class="v">'+(pass?'&#10003; Bestanden':'&#10007; Nicht bestanden')+'</div>'
+    +'<div class="s">'+tot.toFixed(1)+' / 180 Punkte ('+pct+'%)</div>'
+    +'<div class="d">Mindestanforderung: 108/180 (60%) &nbsp;&middot;&nbsp; Datum: '+ts+'</div></div>'
+    // Scores
+    +'<div class="sgrid">'
+    +'<div class="sc"><div class="n">'+sc[0].toFixed(1)+'</div><div class="m">/ 75</div><div class="l">1.1 Lesen</div></div>'
+    +'<div class="sc"><div class="n">'+sc[1].toFixed(1)+'</div><div class="m">/ 30</div><div class="l">1.2 Sprachbausteine</div></div>'
+    +'<div class="sc"><div class="n">'+sc[2].toFixed(1)+'</div><div class="m">/ 75</div><div class="l">2.1 H\u00f6ren</div></div>'
+    +'<div class="sc"><div class="n">\u2013</div><div class="m">/ 45</div><div class="l">Schreiben</div></div>'
+    +'</div>'
+    // Corrections table
+    +'<table><thead><tr>'
+    +'<th></th><th>Aufgabe</th><th>Ihre Antwort</th><th>Richtige Antwort</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>'
+    // Schreiben
+    +'<b style="font-size:.8rem;display:block;margin:.8rem 0 .3rem;color:#7a5c1e">3. Schreiben &ndash; Ihr Text ('+(wc?wc.textContent:'')+')' + '</b>'
+    +'<div class="schtext">'+schText+'</div>'
+    +(function(){
+      // Include grading feedback if available
+      var fbEl = document.getElementById('schreiben-feedback');
+      if(!fbEl||!fbEl.innerHTML) return '<p style="font-size:.7rem;color:#888;font-style:italic;margin-top:.2rem">Schreiben wird vom Prüfer bewertet (max. 45 Punkte).</p>';
+      // Extract text content from the feedback div for clean PDF output
+      var fbDiv = fbEl.querySelector('div');
+      if(!fbDiv) return '';
+      var scoreEl = fbDiv.querySelector('div:first-child');
+      var score = scoreEl ? scoreEl.textContent : '';
+      var subEl = fbDiv.querySelectorAll('div')[1];
+      var sub = subEl ? subEl.textContent : '';
+      var paras = Array.from(fbDiv.querySelectorAll('p')).map(function(p){ return p.textContent; }).join(' ');
+      var corrEls = fbDiv.querySelectorAll('[style*="border-left"]');
+      var corrRows = '';
+      corrEls.forEach(function(c){
+        var orig = c.querySelector('span:nth-child(1)');
+        var corr = c.querySelector('span:nth-child(3)');
+        var typ  = c.querySelector('span:nth-child(4)');
+        var expl = c.querySelector('div');
+        if(orig&&corr){
+          corrRows += '<tr style="background:#fff0f0"><td style="padding:.25rem .4rem;font-size:.72rem;text-decoration:line-through;color:#c0392b">'+(orig.textContent||'')+'</td>'
+            +'<td style="padding:.25rem .4rem;font-size:.72rem;color:#1a7a3c">'+(corr.textContent||'')+'</td>'
+            +'<td style="padding:.25rem .4rem;font-size:.7rem;color:#888">'+(typ?typ.textContent.replace(/[\[\]]/g,''):'')+'</td>'
+            +'<td style="padding:.25rem .4rem;font-size:.7rem;color:#555">'+(expl?expl.textContent:'')+'</td></tr>';
+        }
+      });
+      return '<div style="margin-top:.6rem;padding:.6rem .8rem;background:#fafafa;border:1px solid #e0d8c8;border-radius:3px">'
+        +'<div style="font-weight:700;color:#b8922a;font-size:.82rem">'+score+'</div>'
+        +'<div style="font-size:.72rem;color:#888;margin:.2rem 0">'+sub+'</div>'
+        +(paras?'<p style="font-size:.78rem;margin:.3rem 0;color:#333">'+paras+'</p>':'')
+        +(corrRows?'<table style="width:100%;border-collapse:collapse;margin-top:.5rem"><thead><tr style="background:#f5f0e8"><th style="padding:.2rem .4rem;font-size:.7rem;text-align:left">Fehler</th><th style="padding:.2rem .4rem;font-size:.7rem;text-align:left">Korrektur</th><th style="padding:.2rem .4rem;font-size:.7rem;text-align:left">Typ</th><th style="padding:.2rem .4rem;font-size:.7rem;text-align:left">Erklärung</th></tr></thead><tbody>'+corrRows+'</tbody></table>':'')
+        +'</div>';
+    })()+'<div class="foot">Manish\'s TELC B1 Pr\u00fcfungssimulator &middot; '+ts+'</div>'
+    +'</body></html>';
+
+  // Create a Blob and open it — works in real browsers, may be limited in sandboxes
+  try {
+    var blob = new Blob([html], {type:'text/html'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href   = url;
+    a.download = 'TELC_B1_Ergebnis_'+ts.replace(/\./g,'-')+'.html';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+    showToast('Ergebnis-HTML heruntergeladen! Im Browser öffnen und Ctrl+P → Als PDF speichern.', 6000);
+  } catch(e) {
+    // Fallback: show overlay as before
+    showOverlayPDF(html);
+  }
+}
+
+function showOverlayPDF(html) {
+  var existing = document.getElementById('pdf-overlay');
+  if (existing) existing.remove();
+  document.querySelectorAll('.pdf-content-style').forEach(function(s){ s.remove(); });
+  var ps = document.getElementById('pdf-print-style'); if(ps) ps.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'pdf-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#fff;overflow-y:auto;padding:2rem 1rem';
+
+  var closeBtn = document.createElement('button');
+  closeBtn.textContent = '\u2715 Schliessen';
+  closeBtn.style.cssText = 'position:fixed;top:1rem;right:1rem;background:#c0392b;color:#fff;border:none;padding:.5rem 1rem;cursor:pointer;font-size:.85rem;z-index:100000;border-radius:3px;font-weight:700';
+  closeBtn.onclick = function(){ overlay.remove(); closeBtn.remove(); };
+
+  document.body.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(html, 'text/html');
+  var styleEls = doc.querySelectorAll('style');
+  styleEls.forEach(function(st){
+    var s2 = document.createElement('style');
+    s2.className = 'pdf-content-style';
+    s2.textContent = st.textContent;
+    document.head.appendChild(s2);
+  });
+  overlay.innerHTML = doc.body.innerHTML;
+}
+
+function showToast(msg, dur) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1a7a3c;color:#fff;padding:.8rem 1.4rem;border-radius:4px;z-index:99999;font-size:.82rem;font-weight:600;max-width:90%;text-align:center';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.remove(); }, dur||3000);
+}
+
+function gradeSchreiben(text, points, cb) {
+  if (!text || text.trim().length < 20) { cb(0, 'Kein Text eingegeben.'); return; }
+  var prompt = 'Du bist ein erfahrener TELC B1 Pruefer. Bewerte diesen Brief streng und detailliert nach TELC B1 Kriterien.\n\n'
+    + 'Leitpunkte:\n' + points.map(function(p,i){return (i+1)+'. '+p;}).join('\n')
+    + '\n\nEingereichte Antwort:\n' + text.replace(/[\u0000-\u001F]/g,'').slice(0,2000)
+    + '\n\nBewertung (max. 45 Punkte):\n'
+    + '- Inhalt (15 Pkt): Alle 4 Leitpunkte, Laenge, Verstaendlichkeit\n'
+    + '- Kommunikative Gestaltung (15 Pkt): Datum, Anrede, Schlussformel, Struktur, Kohaerenz\n'
+    + '- Formale Richtigkeit (15 Pkt): Grammatik, Wortschatz, Rechtschreibung, B1-Niveau\n\n'
+    + 'Antworte NUR mit rohem JSON ohne Backticks. Gib bei corrections ALLE Fehler an mit Original und Korrektur:\n'
+    + '{"inhalt":12,"kommunikation":11,"formal":10,"total":33,'
+    + '"feedback":"Allgemeines Feedback in 2-3 Saetzen",'
+    + '"missing":"Was fehlt oder muss verbessert werden",'
+    + '"corrections":[{"original":"fehlerhafte Formulierung","corrected":"korrekte Version","type":"Grammatik","explanation":"Begruendung auf Deutsch"},{"original":"...","corrected":"...","type":"Wortschatz","explanation":"..."}]}';
+
+  // Use same fetch approach as genFetch
+  var seed = Math.random().toString(36).slice(2,6);
+  var body;
+  try {
+    body = JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1200,
+      temperature:0.3,
+      system:'Du bist strenger TELC B1 Pruefer. Antworte NUR mit JSON ohne Backticks. Seed:'+seed,
+      messages:[{role:'user',content:prompt}]
+    });
+  } catch(e) { cb(0,'Fehler beim Erstellen der Anfrage.'); return; }
+
+  fetch('/api/generate', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:body
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.error){ cb(0,'API-Fehler: '+d.error.message); return; }
+    var txt = extractText(d);
+    if(!txt){ cb(0,'Keine Antwort vom Server.'); return; }
+    try {
+      var res = parseGenJSON(txt);
+      cb(Math.min(45,Math.max(0,res.total||0)), res.feedback||'', res.missing||'', res);
+    } catch(e){ cb(0,'Auswertungsfehler: '+e.message); }
+  })
+  .catch(function(e){ cb(0,'Verbindungsfehler: '+e.message); });
+}
+
+// ── QUESTION STORAGE (localStorage) ─────────────────────────────────────────
+var STORAGE_KEY = 'telcb1_questions';
+
+function saveQuestion(type, data) {
+  try {
+    var stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    stored[type] = data;
+    stored._saved = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  } catch(e) { /* localStorage not available */ }
+}
+
+function loadSavedQuestions() {
+  try {
+    var stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+    var data = JSON.parse(stored);
+    if (!data._saved) return null;
+    return data;
+  } catch(e) { return null; }
+}
+
+function clearSavedQuestions() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
+
+function restoreSavedQuestions() {
+  var data = loadSavedQuestions();
+  if (!data) return false;
+  try {
+    if (data.t1) injectT1(data.t1);
+    if (data.t2) injectT2(data.t2);
+    if (data.t3) injectT3(data.t3);
+    if (data.sb1) injectSB1(data.sb1);
+    if (data.sb2) injectSB2(data.sb2);
+    if (data.hv) injectHV(data.hv);
+    // Handle split HV parts
+    if (data.hvp1 || data.hvp2 || data.hvp3) {
+      var merged = {};
+      if (data.hvp1) { merged.t1 = data.hvp1.t1; merged.t1theme = data.hvp1.t1theme; }
+      if (data.hvp2) merged.t2 = data.hvp2.t2;
+      if (data.hvp3) merged.t3 = data.hvp3.t3;
+      injectHV(merged);
+    }
+    if (data.schreiben) injectSchreiben(data.schreiben);
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── QUESTION VERSION HISTORY ────────────────────────────────────────────────
+var VERSION_PREFIX = 'telcb1_v_';
+var MAX_VERSIONS = 10;
+
+function getVersionKey() {
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return VERSION_PREFIX
+    + now.getFullYear() + '-'
+    + pad(now.getMonth()+1) + '-'
+    + pad(now.getDate()) + '_'
+    + pad(now.getHours()) + '-'
+    + pad(now.getMinutes());
+}
+
+function saveVersion() {
+  try {
+    var current = localStorage.getItem(STORAGE_KEY);
+    if (!current) return;
+    var key = getVersionKey();
+    localStorage.setItem(key, current);
+    pruneVersions();
+    return key;
+  } catch(e) { return null; }
+}
+
+function pruneVersions() {
+  try {
+    var keys = getVersionKeys();
+    if (keys.length > MAX_VERSIONS) {
+      keys.slice(0, keys.length - MAX_VERSIONS).forEach(function(k){
+        localStorage.removeItem(k);
+      });
+    }
+  } catch(e) {}
+}
+
+function getVersionKeys() {
+  try {
+    var keys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf(VERSION_PREFIX) === 0) keys.push(k);
+    }
+    return keys.sort();
+  } catch(e) { return []; }
+}
+
+function loadVersion(key) {
+  try {
+    var data = JSON.parse(localStorage.getItem(key) || '{}');
+    if (!data) return false;
+    // Restore using same logic as restoreSavedQuestions
+    if (data.t1) injectT1(data.t1);
+    if (data.t2) injectT2(data.t2);
+    if (data.t3) injectT3(data.t3);
+    if (data.sb1) injectSB1(data.sb1);
+    if (data.sb2) injectSB2(data.sb2);
+    if (data.hv) injectHV(data.hv);
+    if (data.hvp1 || data.hvp2 || data.hvp3) {
+      var merged = {};
+      if (data.hvp1) { merged.t1 = data.hvp1.t1; merged.t1theme = data.hvp1.t1theme; }
+      if (data.hvp2) merged.t2 = data.hvp2.t2;
+      if (data.hvp3) merged.t3 = data.hvp3.t3;
+      injectHV(merged);
+    }
+    if (data.schreiben) injectSchreiben(data.schreiben);
+    // Also set as current
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
+  } catch(e) { return false; }
+}
+
+function formatVersionLabel(key) {
+  // 'telcb1_v_2025-01-15_14-30' → '15.01.2025 · 14:30'
+  var part = key.replace(VERSION_PREFIX, '');
+  var m = part.match(/^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})$/);
+  if (!m) return key;
+  return m[3]+'.'+m[2]+'.'+m[1]+' · '+m[4]+':'+m[5];
+}
+
+function showVersionPanel() {
+  var existing = document.getElementById('version-panel');
+  if (existing) { existing.remove(); return; }
+  var keys = getVersionKeys().reverse();
+  var panel = document.createElement('div');
+  panel.id = 'version-panel';
+  panel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:1px solid var(--bord);padding:1.5rem;z-index:9999;min-width:320px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);border-radius:4px';
+
+  var hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem';
+  var title = document.createElement('b');
+  title.style.cssText = 'font-size:.9rem;color:var(--gold)';
+  title.textContent = 'Gespeicherte Versionen';
+  var xBtn = document.createElement('button');
+  xBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--mut)';
+  xBtn.textContent = '✕';
+  xBtn.onclick = closeVersionPanel;
+  hdr.appendChild(title); hdr.appendChild(xBtn);
+  panel.appendChild(hdr);
+
+  if (keys.length === 0) {
+    var empty = document.createElement('p');
+    empty.style.cssText = 'font-size:.82rem;color:var(--mut);text-align:center;padding:1rem 0';
+    empty.textContent = 'Noch keine Versionen. Generieren Sie ein Modellpaper.';
+    panel.appendChild(empty);
+  } else {
+    var info = document.createElement('div');
+    info.style.cssText = 'font-size:.72rem;color:var(--mut);margin-bottom:.6rem';
+    info.textContent = keys.length + ' Version(en) · max. ' + MAX_VERSIONS + ' gespeichert';
+    panel.appendChild(info);
+    keys.forEach(function(k) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:.5rem;padding:.45rem 0;border-bottom:1px solid var(--bord)';
+      var lbl = document.createElement('span');
+      lbl.style.cssText = 'flex:1;font-size:.82rem;color:var(--txt)';
+      var vd = {};
+      try { vd = JSON.parse(localStorage.getItem(k)||'{}'); } catch(e){}
+      var badge = '';
+      if (vd._result) {
+        var r = vd._result;
+        var dispTot = (r.schreibenTot !== undefined) ? r.schreibenTot : r.tot;
+        var dispMax = (r.schreibenTot !== undefined) ? 225 : 180;
+        badge = ' · ' + dispTot.toFixed(0) + '/' + dispMax + ' ' + (r.schreibenPass !== undefined ? (r.schreibenPass?'✓':'✗') : (r.pass?'✓':'✗'));
+      }
+      lbl.textContent = formatVersionLabel(k) + badge;
+      var loadBtn = document.createElement('button');
+      loadBtn.style.cssText = 'background:var(--gold);color:#fff;border:none;padding:.3rem .75rem;cursor:pointer;font-size:.75rem;border-radius:2px;font-weight:600';
+      loadBtn.textContent = 'Laden';
+      loadBtn.onclick = (function(key){ return function(){ loadVersionUI(key); }; })(k);
+      var delBtn = document.createElement('button');
+      delBtn.style.cssText = 'background:var(--card);border:1px solid var(--bord);color:var(--mut);padding:.3rem .6rem;cursor:pointer;font-size:.75rem;border-radius:2px';
+      delBtn.textContent = 'X';
+      delBtn.onclick = (function(key){ return function(){ deleteVersion(key); }; })(k);
+      row.appendChild(lbl); row.appendChild(loadBtn); row.appendChild(delBtn);
+      panel.appendChild(row);
+    });
+  }
+  document.body.appendChild(panel);
+}
+
+function closeVersionPanel() {
+  var p = document.getElementById('version-panel'); if(p) p.remove();
+}
+
+function loadVersionUI(key) {
+  closeVersionPanel();
+  if (!loadVersion(key)) { showToast('Fehler beim Laden', 2000); return; }
+
+  try {
+    var vdata = JSON.parse(localStorage.getItem(key) || '{}');
+    var result = vdata._result;
+    var answers = vdata._answers;
+
+    if (!result || !answers) {
+      showToast('Version ' + formatVersionLabel(key) + ' geladen (kein Ergebnis gespeichert)', 3000);
+      return;
+    }
+
+    // Replay answers into DOM then run full evaluation
+    replayAnswers(answers, function() {
+      // Show results page with saved data
+      replayResults(result);
+      showToast('Version ' + formatVersionLabel(key) + ' mit Ergebnis geladen', 3000);
+    });
+  } catch(e) {
+    showToast('Version geladen (Ergebnis konnte nicht wiederhergestellt werden)', 3000);
+  }
+}
+
+function deleteVersion(key) {
+  try { localStorage.removeItem(key); } catch(e){}
+  showVersionPanel(); // refresh panel
+}
+
+function collectAnswers() {
+  var ans = {};
+
+  // MCQ (T2 + SB1)
+  ans.mcq = {};
+  document.querySelectorAll('.qb[data-type="mcq"]').forEach(function(b){
+    var qn = b.getAttribute('data-num') || b.querySelector('.qn') && b.querySelector('.qn').textContent.replace(/\D/g,'');
+    var sel = null;
+    b.querySelectorAll('input[type=radio]').forEach(function(r){ if(r.checked) sel = r.value; });
+    if(qn) ans.mcq[qn] = sel;
+  });
+
+  // T/F (HV)
+  ans.tf = {};
+  document.querySelectorAll('.qb[data-type="tf"]').forEach(function(b){
+    var qn = b.getAttribute('data-num') || '';
+    var sb = b.querySelector('.rfb.sel');
+    ans.tf[qn] = sb ? sb.getAttribute('data-v') : null;
+  });
+
+  // T1 heading choices
+  ans.t1 = {};
+  document.querySelectorAll('.t1-item').forEach(function(item){
+    ans.t1[item.dataset.q] = item.dataset.chosen || null;
+  });
+
+  // T3 ad choices
+  ans.t3 = {};
+  document.querySelectorAll('.t3-sit').forEach(function(sit){
+    ans.t3[sit.dataset.q] = sit.dataset.chosen || null;
+  });
+
+  // SB2 wordbank
+  ans.sb2 = {};
+  document.querySelectorAll('.wb-gap').forEach(function(gap){
+    ans.sb2[gap.dataset.gap] = gap.dataset.chosen || null;
+  });
+
+  // Schreiben text
+  var wa = document.getElementById('wa1');
+  ans.schreiben = wa ? wa.value : '';
+
+  return ans;
+}
+
+function saveResultToVersion(sc, tot, pct, pass, schreibenText) {
+  try {
+    // Find the most recently saved version and update it with result + answers
+    var keys = getVersionKeys();
+    if (keys.length === 0) return;
+    var latestKey = keys[keys.length - 1]; // most recent
+    var vdata = JSON.parse(localStorage.getItem(latestKey) || '{}');
+    vdata._result = { sc: sc.slice(), tot: tot, pct: pct, pass: pass,
+                      schreibenText: schreibenText };
+    vdata._answers = collectAnswers();
+    localStorage.setItem(latestKey, JSON.stringify(vdata));
+  } catch(e) {}
+}
+
+function updateResultSchreiben(pts, feedback, missing, raw) {
+  try {
+    var keys = getVersionKeys();
+    if (keys.length === 0) return;
+    var latestKey = keys[keys.length - 1];
+    var vdata = JSON.parse(localStorage.getItem(latestKey) || '{}');
+    if (!vdata._result) return;
+    vdata._result.schreibenPts = pts;
+    vdata._result.schreibenFeedback = feedback;
+    vdata._result.schreibenMissing = missing;
+    vdata._result.schreibenRaw = raw;
+    vdata._result.schreibenTot = vdata._result.sc[0] + vdata._result.sc[1] + vdata._result.sc[3] + pts;
+    vdata._result.schreibenPct = Math.round(vdata._result.schreibenTot / 225 * 100);
+    vdata._result.schreibenPass = vdata._result.schreibenTot >= 135;
+    localStorage.setItem(latestKey, JSON.stringify(vdata));
+  } catch(e) {}
+}
+
+function replayAnswers(answers, cb) {
+  if (!answers) { if(cb) cb(); return; }
+
+  // T1 heading choices
+  if (answers.t1) {
+    document.querySelectorAll('.t1-item').forEach(function(item) {
+      var chosen = answers.t1[item.dataset.q];
+      if (chosen) {
+        item.dataset.chosen = chosen;
+        var q = item.dataset.q.replace('t1-','');
+        var box = document.getElementById('t1c-'+q);
+        if (box) box.querySelectorAll('[data-val]').forEach(function(b){
+          b.classList.toggle('t3-sel', b.getAttribute('data-val') === chosen);
+        });
+      }
+    });
+  }
+
+  // T3 ad choices
+  if (answers.t3) {
+    document.querySelectorAll('.t3-sit').forEach(function(sit) {
+      var chosen = answers.t3[sit.dataset.q];
+      if (chosen) {
+        sit.dataset.chosen = chosen;
+        var box = document.getElementById('t3c-'+sit.dataset.q);
+        if (box) box.querySelectorAll('[data-val]').forEach(function(b){
+          b.classList.toggle('t3-sel', b.getAttribute('data-val') === chosen);
+        });
+      }
+    });
+  }
+
+  // MCQ radios (T2 + SB1)
+  if (answers.mcq) {
+    document.querySelectorAll('.qb[data-type="mcq"]').forEach(function(b) {
+      var qn = b.getAttribute('data-num') || (b.querySelector('.qn') && b.querySelector('.qn').textContent.replace(/\D/g,''));
+      var chosen = answers.mcq[qn];
+      if (chosen) b.querySelectorAll('input[type=radio]').forEach(function(r){
+        if (r.value === chosen) r.checked = true;
+      });
+    });
+  }
+
+  // T/F buttons (HV)
+  if (answers.tf) {
+    document.querySelectorAll('.qb[data-type="tf"]').forEach(function(b) {
+      var qn = b.getAttribute('data-num') || '';
+      var chosen = answers.tf[qn];
+      if (chosen) b.querySelectorAll('.rfb').forEach(function(x){
+        x.classList.toggle('sel', x.getAttribute('data-v') === chosen);
+      });
+    });
+  }
+
+  // SB2 wordbank gaps
+  if (answers.sb2) {
+    document.querySelectorAll('.wb-gap').forEach(function(gap) {
+      var chosen = answers.sb2[gap.dataset.gap];
+      if (chosen) {
+        gap.dataset.chosen = chosen;
+        var box = document.getElementById('wbc-'+gap.dataset.gap);
+        if (box) box.querySelectorAll('[data-val]').forEach(function(b){
+          b.classList.toggle('t3-sel', b.getAttribute('data-val') === chosen);
+        });
+        // Show chosen word in gap
+        var wordEl = document.querySelector('.wb-word[data-letter="'+chosen+'"]');
+        var gapSpan = gap.querySelector('.wb-chosen');
+        if (gapSpan && wordEl) {
+          var lbl = wordEl.querySelector('.wb-lbl');
+          gapSpan.textContent = (lbl ? wordEl.textContent.replace(lbl.textContent,'') : wordEl.textContent).trim();
+        }
+      }
+    });
+  }
+
+  // Schreiben text
+  if (answers.schreiben) {
+    var wa = document.getElementById('wa1');
+    if (wa) {
+      wa.value = answers.schreiben;
+      wcUpdate('wa1','wc1');
+    }
+  }
+
+  if (cb) cb();
+}
+
+function replayResults(result) {
+  // Run submitExam in replay mode using saved scores
+  if(done) return;
+  done = true;
+  clearInterval(ticker);
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  _stopAmbient();
+
+  var sc = result.sc ? result.sc.slice() : [0,0,0,0];
+  var tot = result.tot || 0;
+  var pct = result.pct || 0;
+  var pass = result.pass || false;
+
+  // Apply visual corrections to DOM (same as submitExam but without re-scoring)
+  document.querySelectorAll('.qb[data-type="mcq"]').forEach(function(b){
+    var cor = b.getAttribute('data-cor');
+    var sel = null;
+    b.querySelectorAll('input[type=radio]').forEach(function(r){ if(r.checked) sel = r.value; });
+    b.querySelectorAll('.opt').forEach(function(o){
+      var v = o.querySelector('input').value;
+      if(v===cor) o.classList.add('cor');
+      else if(v===sel&&sel!==cor) o.classList.add('wrg');
+    });
+  });
+
+  document.querySelectorAll('.qb[data-type="tf"]').forEach(function(b){
+    var cor = b.getAttribute('data-cor');
+    var corVal = cor==='+'?'richtig':'falsch';
+    var sb = b.querySelector('.rfb.sel'), sv = sb ? sb.getAttribute('data-v') : null;
+    b.querySelectorAll('.rfb').forEach(function(x){
+      if(x.getAttribute('data-v')===corVal) x.classList.add('cor');
+      else if(x.getAttribute('data-v')===sv&&sv!==corVal) x.classList.add('wrg');
+    });
+    var fb = b.querySelector('.fb'); if(fb) fb.classList.add('show');
+  });
+
+  document.querySelectorAll('.t1-item').forEach(function(item){
+    var cor=item.dataset.cor, chosen=item.dataset.chosen||'';
+    var num=item.dataset.q.replace('t1-','');
+    var box=document.getElementById('t1c-'+num), fb=document.getElementById('t1fb-'+num);
+    if(chosen===cor){
+      item.style.borderLeftColor='var(--grn)';
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✓ Richtig! Überschrift '+cor.toUpperCase()+' passt.';fb.classList.add('show');}
+    } else {
+      item.style.borderLeftColor='var(--red)';
+      if(chosen&&box)box.querySelectorAll('[data-val="'+chosen+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-wrong');});
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✗ Ihre Antwort: '+(chosen||'–').toUpperCase()+' · Richtig: '+cor.toUpperCase();fb.classList.add('show');}
+    }
+  });
+
+  document.querySelectorAll('.t3-sit').forEach(function(sit){
+    var cor=sit.dataset.cor, chosen=sit.dataset.chosen||'', pts=parseFloat(sit.dataset.pts)||0;
+    var q=sit.dataset.q;
+    var box=document.getElementById('t3c-'+q), fb=document.getElementById('t3fb-'+q);
+    if(pts>0&&chosen===cor){
+      sit.style.borderLeftColor='var(--grn)';
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✓ Richtig!';fb.classList.add('show');}
+    } else if(pts>0){
+      sit.style.borderLeftColor='var(--red)';
+      if(chosen&&box)box.querySelectorAll('[data-val="'+chosen+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-wrong');});
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✗ Ihre Antwort: '+(chosen||'–').toUpperCase()+' · Richtig: '+cor.toUpperCase();fb.classList.add('show');}
+    }
+  });
+
+  document.querySelectorAll('.wb-gap').forEach(function(gap){
+    var cor=gap.dataset.cor, chosen=gap.dataset.chosen||'';
+    var gn=gap.dataset.gap;
+    var box=document.getElementById('wbc-'+gn), fb=document.getElementById('wbfb-'+gn);
+    if(chosen===cor){
+      gap.style.borderLeftColor='var(--grn)';
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✓ Richtig!';fb.classList.add('show');}
+    } else {
+      gap.style.borderLeftColor='var(--red)';
+      if(chosen&&box)box.querySelectorAll('[data-val="'+chosen+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-wrong');});
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✗ Richtig: '+cor.toUpperCase();fb.classList.add('show');}
+    }
+  });
+
+  showRes(sc, tot, pct, pass);
+
+  // Restore Schreiben card and feedback if graded
+  if (result.schreibenPts !== undefined) {
+    var sc2 = document.getElementById('schreiben-card');
+    if(sc2) sc2.outerHTML = '<div class="bc" id="schreiben-card"><div class="bn">Schreiben</div><div class="bs">'+result.schreibenPts.toFixed(1)+'</div><div class="bm">/ 45 Pkt</div></div>';
+
+    var newTot = result.schreibenTot || tot;
+    var newPct = result.schreibenPct || pct;
+    var newPass = result.schreibenPass || pass;
+
+    var rpct = document.getElementById('rpct');
+    if(rpct) rpct.textContent = newTot.toFixed(1)+' / 225 Punkte inkl. Schreiben ('+newPct+'%)';
+    var rm = document.getElementById('rm');
+    if(rm) rm.textContent = newPass
+      ? 'Sehr gut! Sie haben die Prüfung bestanden (inkl. Schreiben).'
+      : 'Sie benötigen noch '+(135-newTot).toFixed(1)+' Punkte. Mindestanforderung: 135/225 (60%).';
+    var rv = document.getElementById('rv'); if(rv) rv.textContent = newPass ? '✓ Bestanden' : '✗ Nicht bestanden';
+    var rh = document.getElementById('rh'); if(rh) rh.className = 'rh '+(newPass?'pass':'fail');
+
+    // Rebuild Schreiben feedback
+    var raw = result.schreibenRaw || {};
+    var feedback = result.schreibenFeedback || '';
+    var missing = result.schreibenMissing || '';
+    var corrHtml = '';
+    if(raw.corrections && raw.corrections.length > 0){
+      corrHtml = '<div style="margin-top:.8rem"><div style="font-size:.78rem;font-weight:700;color:var(--txt);margin-bottom:.4rem;border-bottom:1px solid var(--bord);padding-bottom:.3rem">Korrekturen</div>';
+      raw.corrections.forEach(function(c){
+        corrHtml += '<div style="margin:.45rem 0;padding:.5rem .7rem;background:var(--bg);border-left:3px solid '+(c.type==='Grammatik'?'#c0392b':c.type==='Wortschatz'?'#2980b9':'#e67e22')+';border-radius:0 3px 3px 0;font-size:.78rem">'
+          +'<span style="background:#fbeaea;color:#c0392b;padding:.1rem .35rem;border-radius:2px;text-decoration:line-through;margin-right:.4rem">'+escHtml(c.original||'')+'</span>'
+          +'<span style="color:#888;margin-right:.4rem">→</span>'
+          +'<span style="background:#eafbea;color:#1a7a3c;padding:.1rem .35rem;border-radius:2px;margin-right:.5rem">'+escHtml(c.corrected||'')+'</span>'
+          +'<span style="font-size:.7rem;color:var(--mut);font-style:italic">['+escHtml(c.type||'')+']</span>'
+          +(c.explanation?'<div style="margin-top:.2rem;color:var(--txt2);font-size:.72rem">'+escHtml(c.explanation)+'</div>':'')
+          +'</div>';
+      });
+      corrHtml += '</div>';
+    }
+    var schFb = document.getElementById('schreiben-feedback');
+    if(!schFb){schFb=document.createElement('div');schFb.id='schreiben-feedback';document.getElementById('bg').after(schFb);}
+    schFb.innerHTML = '<div style="background:var(--card);border:1px solid var(--bord);padding:.9rem 1.1rem;margin-top:.8rem;border-radius:4px">'
+      +'<div style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:.35rem">Schreiben: '+result.schreibenPts+'/45 Punkte</div>'
+      +'<div style="font-size:.75rem;color:var(--mut);margin-bottom:.5rem">Inhalt: '+(raw.inhalt||0)+'/15 &nbsp;·&nbsp; Kommunikation: '+(raw.kommunikation||0)+'/15 &nbsp;·&nbsp; Formal: '+(raw.formal||0)+'/15</div>'
+      +(feedback?'<p style="margin:.35rem 0;color:var(--txt2);font-size:.83rem;line-height:1.6">'+escHtml(feedback)+'</p>':'')
+      +(missing?'<p style="color:#c0392b;font-size:.78rem;margin:.3rem 0">⚠ '+escHtml(missing)+'</p>':'')
+      +corrHtml+'</div>';
+    schFb.style.display = 'block';
+
+    var gScore = document.getElementById('gScore');
+    if(gScore) gScore.innerHTML = '<div style="padding:.85rem 1.1rem;border:1px solid '+(newPass?'var(--grn)':'var(--red)')+';background:'+(newPass?'var(--cbg)':'var(--rbg)')+';font-family:\'JetBrains Mono\',monospace;font-size:.78rem;color:'+(newPass?'var(--grn)':'var(--red)')+'">'+
+      (newPass?'✓ Gut gemacht!':'✗ Weiter üben!')+'  '+newTot.toFixed(1)+'/225 ('+newPct+'%)</div>';
+  } else {
+    var sc2b = document.getElementById('schreiben-card');
+    if(sc2b) sc2b.outerHTML='<div class="bc" id="schreiben-card"><div class="bn">Schreiben</div><div class="bs">–</div><div class="bm">/ 45 Pkt</div></div>';
+  }
+}
+
+function submitExam(){
+  if(done)return;done=true;clearInterval(ticker);
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  _stopAmbient();
+  var sc=[0,0,0,0];
+
+  // Score MCQ radio (T2 Detailverstehen + SB1)
+  document.querySelectorAll('.qb[data-type="mcq"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'),pts=parseFloat(b.getAttribute('data-pts'))||5;
+    var si=parseInt(b.getAttribute('data-sec'));
+    var sel=null;
+    b.querySelectorAll('input[type=radio]').forEach(function(r){if(r.checked)sel=r.value;});
+    b.querySelectorAll('.opt').forEach(function(o){
+      var v=o.querySelector('input').value;
+      if(v===cor)o.classList.add('cor');
+      else if(v===sel&&sel!==cor)o.classList.add('wrg');
+    });
+    if(sel===cor)sc[si]+=pts;
+  });
+
+  // Score T/F (Hörverstehen)
+  document.querySelectorAll('.qb[data-type="tf"]').forEach(function(b){
+    var cor=b.getAttribute('data-cor'),pts=parseFloat(b.getAttribute('data-pts'))||5;
+    var si=parseInt(b.getAttribute('data-sec'));
+    var sb=b.querySelector('.rfb.sel'),sv=sb?sb.getAttribute('data-v'):null;
+    var corVal=cor==='+'?'richtig':'falsch';
+    b.querySelectorAll('.rfb').forEach(function(x){
+      if(x.getAttribute('data-v')===corVal)x.classList.add('cor');
+      else if(x.getAttribute('data-v')===sv&&sv!==corVal)x.classList.add('wrg');
+    });
+    var fb=b.querySelector('.fb');if(fb)fb.classList.add('show');
+    if(sv===corVal)sc[si]+=pts;
+  });
+
+  // Score T1 Globalverstehen (letter buttons)
+  document.querySelectorAll('.t1-item').forEach(function(item){
+    var cor=item.dataset.cor,chosen=item.dataset.chosen||'',pts=parseFloat(item.dataset.pts)||5;
+    var num=item.dataset.q.replace('t1-','');
+    var box=document.getElementById('t1c-'+num),fb=document.getElementById('t1fb-'+num);
+    if(chosen===cor){
+      sc[0]+=pts;
+      item.style.borderLeftColor='var(--grn)';
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✓ Richtig! Überschrift '+cor.toUpperCase()+' passt.';fb.classList.add('show');}
+    } else {
+      item.style.borderLeftColor='var(--red)';
+      if(chosen&&box)box.querySelectorAll('[data-val="'+chosen+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-wrong');});
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✗ Ihre Antwort: '+(chosen||'–').toUpperCase()+' · Richtig: '+cor.toUpperCase();fb.classList.add('show');}
+    }
+  });
+
+  // Score T3 Selektives Verstehen (letter buttons, only pts>0)
+  document.querySelectorAll('.t3-sit').forEach(function(sit){
+    var cor=sit.dataset.cor,chosen=sit.dataset.chosen||'',pts=parseFloat(sit.dataset.pts)||0;
+    var q=sit.dataset.q;
+    var box=document.getElementById('t3c-'+q),fb=document.getElementById('t3fb-'+q);
+    if(pts>0&&chosen===cor){
+      sc[0]+=pts;
+      sit.style.borderLeftColor='var(--grn)';
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✓ Richtig! Anzeige '+cor.toUpperCase()+' passt.';fb.classList.add('show');}
+    } else if(pts>0){
+      sit.style.borderLeftColor='var(--red)';
+      if(chosen&&box)box.querySelectorAll('[data-val="'+chosen+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-wrong');});
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✗ Ihre Antwort: '+(chosen||'–').toUpperCase()+' · Richtig: '+cor.toUpperCase();fb.classList.add('show');}
+    }
+  });
+
+  // Score SB2 Wortbank (letter buttons)
+  document.querySelectorAll('.wb-gap').forEach(function(gap){
+    var cor=gap.dataset.cor,chosen=gap.dataset.chosen||'';
+    var gn=gap.dataset.gap;
+    var box=document.getElementById('wbc-'+gn),fb=document.getElementById('wbfb-'+gn);
+    if(chosen===cor){
+      sc[1]+=1.5;
+      gap.style.borderLeftColor='var(--grn)';
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✓ Richtig!';fb.classList.add('show');}
+    } else {
+      gap.style.borderLeftColor='var(--red)';
+      if(chosen&&box)box.querySelectorAll('[data-val="'+chosen+'"]').forEach(function(b){b.classList.remove('t3-sel');b.classList.add('t3-wrong');});
+      if(box)box.querySelectorAll('[data-val="'+cor+'"]').forEach(function(b){b.classList.add('t3-cor');});
+      if(fb){fb.textContent='✗ Richtig: '+cor.toUpperCase();fb.classList.add('show');}
+    }
+  });
+
+  var tot=sc[0]+sc[1]+sc[3],pct=Math.round(tot/180*100),pass=tot>=108;
+  showRes(sc,tot,pct,pass);
+  // Save result snapshot to current version
+  var waElS = document.getElementById('wa1');
+  saveResultToVersion(sc, tot, pct, pass, waElS ? waElS.value : '');
+  // If no Schreiben text, show dash (only when not grading)
+  if(!waEl||waEl.value.trim().length<=20){
+    var sc2=document.getElementById('schreiben-card');
+    if(sc2) sc2.outerHTML='<div class="bc" id="schreiben-card"><div class="bn">Schreiben</div><div class="bs">–</div><div class="bm">/ 45 Pkt</div></div>';
+  }
+  // Grade Schreiben with AI
+  var waEl=document.getElementById('wa1');
+  var waText=waEl?waEl.value:'';
+  // Get current Schreiben points from the task
+  var schPts=[];
+  document.querySelectorAll('.wp ul li').forEach(function(li){schPts.push(li.textContent.trim());});
+  if(waText.trim().length>20 && schPts.length>0){
+    // Show hourglass immediately before async grading starts
+    var sc2=document.getElementById('schreiben-card');
+    if(sc2) sc2.outerHTML='<div class="bc" id="schreiben-card"><div class="bn">Schreiben</div><div class="bs" id="schreiben-status" style="font-size:1.1rem">⏳</div><div class="bm">wird bewertet…</div></div>';
+    gradeSchreiben(waText, schPts, function(pts, feedback, missing, raw){
+      sc[2]=pts;
+      var newTot=sc[0]+sc[1]+sc[3]+pts;
+      var newPct=Math.round(newTot/225*100);
+      var newPass=newTot>=135;
+      // Update results display — scores, verdict, pass/fail
+      var rpct=document.getElementById('rpct');
+      if(rpct) rpct.textContent=newTot.toFixed(1)+' / 225 Punkte inkl. Schreiben ('+newPct+'%)';
+      var rm=document.getElementById('rm');
+      if(rm) rm.textContent=newPass
+        ?'Sehr gut! Sie haben die Prüfung bestanden (inkl. Schreiben).'
+        :'Sie benötigen noch '+(135-newTot).toFixed(1)+' Punkte. Mindestanforderung: 135/225 Punkte (60%).';
+      var rv=document.getElementById('rv');
+      if(rv){ rv.textContent=newPass?'✓ Bestanden':'✗ Nicht bestanden'; }
+      var rh=document.getElementById('rh');
+      if(rh){ rh.className='rh '+(newPass?'pass':'fail'); }
+      // Rebuild Schreiben card with actual score
+      var schCard=document.getElementById('schreiben-card');
+      if(schCard){
+        schCard.outerHTML='<div class="bc" id="schreiben-card">'
+          +'<div class="bn">Schreiben</div>'
+          +'<div class="bs">'+pts.toFixed(1)+'</div>'
+          +'<div class="bm">/ 45 Pkt</div>'
+          +'</div>';
+      }
+      var schFb=document.getElementById('schreiben-feedback');
+      if(schFb){
+        var corrHtml='';
+        if(raw&&raw.corrections&&raw.corrections.length>0){
+          corrHtml='<div style="margin-top:.8rem">'
+            +'<div style="font-size:.78rem;font-weight:700;color:var(--txt);margin-bottom:.4rem;border-bottom:1px solid var(--bord);padding-bottom:.3rem">Korrekturen</div>';
+          raw.corrections.forEach(function(c,i){
+            corrHtml+='<div style="margin:.45rem 0;padding:.5rem .7rem;background:var(--bg);border-left:3px solid '+(c.type==='Grammatik'?'#c0392b':c.type==='Wortschatz'?'#2980b9':'#e67e22')+';border-radius:0 3px 3px 0;font-size:.78rem">'
+              +'<span style="background:#fbeaea;color:#c0392b;padding:.1rem .35rem;border-radius:2px;text-decoration:line-through;margin-right:.4rem">'+escHtml(c.original||'')+'</span>'
+              +'<span style="color:#888;margin-right:.4rem">→</span>'
+              +'<span style="background:#eafbea;color:#1a7a3c;padding:.1rem .35rem;border-radius:2px;margin-right:.5rem">'+escHtml(c.corrected||'')+'</span>'
+              +'<span style="font-size:.7rem;color:var(--mut);font-style:italic">['+escHtml(c.type||'')+']</span>'
+              +(c.explanation?'<div style="margin-top:.2rem;color:var(--txt2);font-size:.72rem">'+escHtml(c.explanation)+'</div>':'')
+              +'</div>';
+          });
+          corrHtml+='</div>';
+        }
+        schFb.innerHTML='<div style="background:var(--card);border:1px solid var(--bord);padding:.9rem 1.1rem;margin-top:.8rem;border-radius:4px">'
+          +'<div style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:.35rem">Schreiben: '+pts+'/45 Punkte</div>'
+          +'<div style="font-size:.75rem;color:var(--mut);margin-bottom:.5rem">Inhalt: '+( raw?raw.inhalt:0)+'/15 &nbsp;·&nbsp; Kommunikation: '+(raw?raw.kommunikation:0)+'/15 &nbsp;·&nbsp; Formal: '+(raw?raw.formal:0)+'/15</div>'
+          +(feedback?'<p style="margin:.35rem 0;color:var(--txt2);font-size:.83rem;line-height:1.6">'+escHtml(feedback)+'</p>':'')
+          +(missing?'<p style="color:#c0392b;font-size:.78rem;margin:.3rem 0">⚠ '+escHtml(missing)+'</p>':'')
+          +corrHtml
+          +'</div>';
+        schFb.style.display='block';
+      }
+      updateResultSchreiben(pts, feedback, missing, raw);
+      var gScore=document.getElementById('gScore');
+      if(gScore){gScore.innerHTML='<div style="padding:.85rem 1.1rem;border:1px solid '+(newPass?'var(--grn)':'var(--red)')+';background:'+(newPass?'var(--cbg)':'var(--rbg)')+';font-family:\'JetBrains Mono\',monospace;font-size:.78rem;color:'+(newPass?'var(--grn)':'var(--red)')+'">'+
+        (newPass?'✓ Gut gemacht!':'✗ Weiter üben!')+'  '+newTot.toFixed(1)+'/225 ('+newPct+'%)</div>';}
+    });
+  }
+}
+
+function showRes(sc,tot,pct,pass){
+  document.getElementById('exam').style.display='none';
+  document.getElementById('results').style.display='block';
+  var rh=document.getElementById('rh');
+  rh.className='rh '+(pass?'pass':'fail');
+  document.getElementById('rv').textContent=pass?'✓ Bestanden':'✗ Nicht bestanden';
+  document.getElementById('rpct').textContent=tot.toFixed(1)+' / 180 Punkte ('+pct+'%)';
+  document.getElementById('rm').textContent=pass
+    ?'Sehr gut! Sie haben die automatisch bewerteten Aufgaben bestanden.'
+    :'Sie benötigen noch '+(108-tot).toFixed(1)+' Punkte. Mindestanforderung: 108/180 Punkte (60%).';
+  var html='';
+  html+='<div class="bc"><div class="bn">1.1 Lesen</div><div class="bs">'+sc[0].toFixed(1)+'</div><div class="bm">/ 75 Pkt</div></div>';
+  html+='<div class="bc"><div class="bn">1.2 Sprachbausteine</div><div class="bs">'+sc[1].toFixed(1)+'</div><div class="bm">/ 30 Pkt</div></div>';
+  html+='<div class="bc" id="schreiben-card"><div class="bn">Schreiben</div><div class="bs" id="schreiben-status">⏳ wird bewertet…</div><div class="bm">/ 45 Pkt</div></div>';
+  html+='<div class="bc"><div class="bn">2.1 Hören</div><div class="bs">'+sc[3].toFixed(1)+'</div><div class="bm">/ 75 Pkt</div></div>';
+  document.getElementById('bg').innerHTML=html;
+  var schFbDiv=document.getElementById('schreiben-feedback');
+  if(!schFbDiv){schFbDiv=document.createElement('div');schFbDiv.id='schreiben-feedback';schFbDiv.style.display='none';
+  document.getElementById('bg').after(schFbDiv);}
+  var gScore=document.getElementById('gScore');
+  if(gScore)gScore.innerHTML='<div style="padding:.85rem 1.1rem;border:1px solid '+(pass?'var(--grn)':'var(--red)')+';background:'+(pass?'var(--cbg)':'var(--rbg)')+';font-family:\'JetBrains Mono\',monospace;font-size:.78rem;color:'+(pass?'var(--grn)':'var(--red)')+'">'+
+    (pass?'✓ Gut gemacht!':'✗ Weiter üben!')+'  '+tot.toFixed(1)+'/180 richtig ('+pct+'%)</div>';
+}
+
+// ── AI GENERATOR ─────────────────────────────────────────────────────────────
+var ACFG={
+  hv1:{maxP:1,rsecs:30,plays:0,started:false,busy:false,theme:"Freizeit",
+    rule:"Hoerverstehen, Teil eins. Das Thema heute: Freizeit. Wir haben fuenf Personen nach ihrer Meinung gefragt. Sie hoeren die Antworten nur einmal. Entscheiden Sie: Sind die Aussagen 41 bis 45 richtig oder falsch? Sie haben 30 Sekunden Zeit, die Aufgaben zu lesen.",
+    texts:[{"num": 41, "text": "Also ich bin total sportverrückt. Nach der Arbeit gehe ich fast jeden Tag ins Fitnessstudio oder laufen. Am Wochenende spiele ich mit Freunden Tennis. Ich kann mir Freizeit ohne Bewegung ehrlich gesagt gar nicht vorstellen.", "speaker": "female", "charName": "f1", "rate": 0.9, "pitch": 1.12}, {"num": 42, "text": "Na, ich bin seit einem Jahr in Rente und habe endlich Zeit für meine Leidenschaft: das Lesen. Ich verschlinge förmlich die Bücher. Krimis, Biografien, alles. Früher hatte ich nie Zeit dafür, aber jetzt lese ich manchmal drei Bücher pro Woche.", "speaker": "male", "charName": "m1", "rate": 0.83, "pitch": 0.85}, {"num": 43, "text": "Ich bin so ein Naturmensch. Wandern, Radfahren, im Garten arbeiten – alles was draußen ist. Ich wohne zum Glück in der Nähe von Wäldern und Seen. Wenn ich ein Wochenende drinnen verbringen muss, werde ich richtig unruhig.", "speaker": "female", "charName": "f2", "rate": 0.87, "pitch": 1.02}, {"num": 44, "text": "Ich spiele Gitarre, schon seit ich zwölf bin. Und seit zwei Jahren bin ich in einer Band. Wir proben jeden Freitagabend und ab und zu spielen wir auch kleine Konzerte. Das ist mein absoluter Ausgleich zum stressigen Bürojob.", "speaker": "male", "charName": "m2", "rate": 0.89, "pitch": 1.05}, {"num": 45, "text": "Oh, ich bin sehr gesellig. Freizeit bedeutet für mich vor allem Zeit mit Menschen. Ich treffe Freunde zum Kaffee, wir kochen zusammen, wir gehen ins Kino. Ich brauche den sozialen Kontakt wirklich. Zu Hause sitzen – das ist nichts für mich.", "speaker": "female", "charName": "f3", "rate": 0.88, "pitch": 0.98}]},
+  hv2:{maxP:2,rsecs:60,plays:0,started:false,busy:false,
+    rule:"Hörverstehen, Teil zwei. Sie hören jetzt ein Interview. Es wird zweimal abgespielt. Entscheiden Sie: Sind die Aussagen 46 bis 55 richtig oder falsch? Sie haben eine Minute Zeit, die Aufgaben zu lesen.",
+    texts:[{"speaker": "moderator", "text": "Guten Tag, Frau Steinberg. Schön, dass Sie Zeit für uns haben. Sie sind Köchin – wie sind Sie dazu gekommen?", "rate": 0.9, "pitch": 1.02}, {"speaker": "guest", "text": "Guten Tag! Gerne. Also, ich habe das gar nicht gelernt, ehrlich gesagt. Ich hab Betriebswirtschaft studiert und dann irgendwann gemerkt – das ist nicht mein Weg. Kochen war immer meine Leidenschaft, und ich habe einfach angefangen.", "rate": 0.87, "pitch": 1.1}, {"speaker": "moderator", "text": "Interessant. Und heute haben Sie Ihr eigenes Restaurant?", "rate": 0.91, "pitch": 1.0}, {"speaker": "guest", "text": "Ja, seit vier Jahren. Es ist klein, zwanzig Plätze, aber es ist meins. Ich habe alles selbst aufgebaut, das Konzept, die Karte, alles. Das macht mich sehr stolz.", "rate": 0.86, "pitch": 1.12}, {"speaker": "moderator", "text": "Die Arbeitszeiten in der Gastronomie sind ja bekannt schwierig. Wie erleben Sie das?", "rate": 0.9, "pitch": 1.01}, {"speaker": "guest", "text": "Das ist tatsächlich das Härteste an diesem Beruf. Freitag, Samstag, Feiertage – genau dann, wenn andere frei haben, stehe ich in der Küche. Das ist manchmal wirklich nicht einfach für das Privatleben.", "rate": 0.85, "pitch": 1.08}, {"speaker": "moderator", "text": "Kochen Sie privat auch so aufwendig wie im Restaurant?", "rate": 0.91, "pitch": 1.0}, {"speaker": "guest", "text": "Nein, nein! Zuhause mache ich ganz einfache Sachen. Pasta, Suppe, Omelette. Nach einem langen Abend in der Küche möchte ich nichts Kompliziertes mehr. Das ist genau wie bei einem Friseur – der schneidet sich selbst die Haare nie so perfekt.", "rate": 0.88, "pitch": 1.15}, {"speaker": "moderator", "text": "Was ist Ihnen bei den Zutaten wichtig?", "rate": 0.9, "pitch": 1.02}, {"speaker": "guest", "text": "Ich arbeite fast ausschließlich mit Produkten aus der Region. Der Bauer, der meine Tomaten anbaut, wohnt fünfzehn Kilometer von hier. Das schmeckt man, und es ist gut für die Umwelt. Das ist mir wirklich sehr wichtig.", "rate": 0.86, "pitch": 1.09}, {"speaker": "moderator", "text": "Haben Sie viele Mitarbeiter?", "rate": 0.91, "pitch": 1.01}, {"speaker": "guest", "text": "Nein, es sind wirklich wenige. Ich habe eine Aushilfe in der Küche und zwei Servicekräfte. Das war eine bewusste Entscheidung – klein bleiben, Qualität vor Quantität.", "rate": 0.87, "pitch": 1.11}, {"speaker": "moderator", "text": "Haben Sie Träume oder Pläne für die Zukunft?", "rate": 0.9, "pitch": 1.0}, {"speaker": "guest", "text": "Oh ja. Ich möchte unbedingt mehr reisen – Japan, Mexiko, Marokko. Nicht als Tourist, sondern um zu lernen, wie die Menschen dort kochen. Diese Einflüsse möchte ich dann in meine Küche bringen.", "rate": 0.85, "pitch": 1.13}, {"speaker": "moderator", "text": "Ist Ihr Restaurant denn jeden Tag geöffnet?", "rate": 0.91, "pitch": 1.02}, {"speaker": "guest", "text": "Nein, montags und dienstags haben wir geschlossen. Ich brauche diese Tage zur Regeneration. Und mein Team auch. Man kann nicht sieben Tage in der Woche auf höchstem Niveau kochen.", "rate": 0.88, "pitch": 1.08}, {"speaker": "moderator", "text": "Wie läuft das Restaurant – sind Sie zufrieden?", "rate": 0.9, "pitch": 1.01}, {"speaker": "guest", "text": "Ja, sehr. Wir sind meistens ausgebucht am Wochenende, und die Bewertungen sind gut. Ich habe nie gedacht, dass es so schnell so gut läuft. Es macht mich wirklich glücklich.", "rate": 0.86, "pitch": 1.14}, {"speaker": "moderator", "text": "Was würden Sie jungen Menschen raten, die in die Gastronomie wollen?", "rate": 0.91, "pitch": 1.0}, {"speaker": "guest", "text": "Ich sage immer: Wenn es eure Leidenschaft ist, dann macht es. Es ist harte Arbeit, lange Stunden, wenig Geld am Anfang. Aber wenn man es liebt, dann gibt es nichts Schöneres. Die Gastronomie ist wunderschön.", "rate": 0.85, "pitch": 1.1}]},
+  hv3:{maxP:2,rsecs:30,plays:0,started:false,busy:false,
+    rule:"Hörverstehen, Teil drei. Sie hören fünf kurze Texte. Jeder Text wird zweimal abgespielt. Entscheiden Sie: Sind die Aussagen 56 bis 60 richtig oder falsch? Sie haben 30 Sekunden Zeit.",
+    texts:[{"num": 56, "text": "Achtung, eine Durchsage für Reisende des Intercity 847 nach München. Dieser Zug wird heute voraussichtlich zwanzig Minuten später als geplant abfahren. Wir bitten alle Fahrgäste, auf dem Bahnsteig auf weitere Ansagen zu warten. Wir entschuldigen uns für die Verzögerung.", "rate": 0.83, "pitch": 0.95}, {"num": 57, "text": "Herzlich willkommen bei Sport Braun. Nur heute, samstag, haben wir für Sie ein Sonderangebot: dreißig Prozent auf alle Winterjacken und Skibekleidung im Erdgeschoss. Das Angebot gilt solange der Vorrat reicht. Wir wünschen Ihnen viel Spaß beim Stöbern.", "rate": 0.83, "pitch": 0.95}, {"num": 58, "text": "Liebe Kursteilnehmer des Deutschkurses B1 beim Bildungszentrum Mitte. Wir müssen Ihnen leider mitteilen, dass der Kursstart auf den fünfzehnten verschoben wird. Bitte beachten Sie das neue Datum in Ihrer Kursbestätigung. Bei Fragen wenden Sie sich an unser Büro.", "rate": 0.83, "pitch": 0.95}, {"num": 59, "text": "Die Stadtbibliothek Westpark informiert: Unsere Öffnungszeiten sind montags bis freitags von neun bis neunzehn Uhr. Am Samstag sind wir von zehn bis fünfzehn Uhr für Sie geöffnet. Sonntags bleibt die Bibliothek geschlossen. Wir freuen uns auf Ihren Besuch.", "rate": 0.83, "pitch": 0.95}, {"num": 60, "text": "Sehr geehrte Gäste des heutigen Abendkonzerts. Wir möchten Sie darauf hinweisen, dass das Konzert aufgrund von Renovierungsarbeiten nicht im großen Saal, sondern im Kammermusiksaal im zweiten Obergeschoss stattfindet. Bitte folgen Sie den Hinweisschildern. Vielen Dank.", "rate": 0.83, "pitch": 0.95}]}
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// KI-FRAGENGENERATOR — populates the simulator directly
+// ═══════════════════════════════════════════════════════════════
+
+var genSYS = {
+  t1: {
+    label: 'Lesen Teil 1 - Globalverstehen',
+    tokens: 1800,
+    prompt: 'Erstelle eine authentische TELC B1 Leseverstehen Teil 1 Aufgabe. Orientiere dich an echten Zeitungs- und Magazintexten.\n\nAnforderungen:\n- 10 Überschriften (a-j): präzise, spezifisch, teils sehr ähnlich als Distraktoren (z.B. \"Neu: Taxi-Ticket für Jugendliche\" vs \"Gratis Taxi für Disco-Besucher\")\n- 5 Texte: je 120-150 Wörter, journalistischer Stil, mit konkreten Details (Namen, Orte, Zahlen, Institutionen)\n- Jeder Text hat genau eine passende Überschrift, die anderen 5 sind plausible Distraktoren\n- Themen: Alltag, Gesellschaft, Beruf, Kultur, Technik, Gesundheit, Reise\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"headings":{"a":"Lange, spezifische Überschrift mit Untertitel","b":"...","c":"...","d":"...","e":"...","f":"...","g":"...","h":"...","i":"...","j":"..."},"texts":[{"num":1,"body":"Langer, informativer Zeitungstext mit konkreten Details und korrekter Grammatik. Mindestens 120 Wörter. Klarer Bezug zur Lösung, aber keine direkte Wiederholung der Überschrift.","cor":"b"},{"num":2,"body":"...mindestens 120 Wörter...","cor":"d"},{"num":3,"body":"...mindestens 120 Wörter...","cor":"a"},{"num":4,"body":"...mindestens 120 Wörter...","cor":"f"},{"num":5,"body":"...mindestens 120 Wörter...","cor":"h"}]}'
+  },
+  t2: {
+    label: 'Lesen Teil 2 - Detailverstehen',
+    tokens: 1600,
+    prompt: 'Erstelle eine authentische TELC B1 Leseverstehen Teil 2 Aufgabe im Stil echter Zeitungsartikel.\n\nAnforderungen:\n- Artikel: 350-400 Wörter, journalistischer Stil, kohärenter Aufbau mit Einleitung/Hauptteil/Schluss\n- Themen: Beruf, Gesellschaft, Wissenschaft, Kultur, Reise, Menschen\n- 5 Aufgaben (6-10): Jede Aufgabe ist eine Aussage oder Frage mit 3 Optionen (a/b/c)\n- Optionen sind VOLLSTÄNDIGE, plausible Sätze — keine Einwortoption\n- Richtige Antwort erfordert Textverständnis, NICHT nur Schlüsselwortsuche\n- Falsche Optionen klingen plausibel, sind aber inhaltlich falsch oder nicht im Text belegt\n- Keine direkte Kopie von Textsätzen als Option — umformulieren!\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"title":"Artikel-Überschrift — Unterüberschrift","article":"Vollständiger Artikel mit 350-400 Wörtern. Mehrere Absätze. Journalistischer Stil mit Quellenangaben, Zitaten, konkreten Fakten und Zahlen.","questions":[{"num":6,"q":"Aussage oder Frage zum Text...","a":"Plausible aber falsche Option als vollständiger Satz","b":"Korrekte Antwort als vollständiger Satz basierend auf dem Text","c":"Weitere plausible aber falsche Option","cor":"b"},{"num":7,"q":"...","a":"...","b":"...","c":"...","cor":"a"},{"num":8,"q":"...","a":"...","b":"...","c":"...","cor":"c"},{"num":9,"q":"...","a":"...","b":"...","c":"...","cor":"a"},{"num":10,"q":"...","a":"...","b":"...","c":"...","cor":"b"}]}'
+  },
+  t3: {
+    label: 'Lesen Teil 3 - Selektives Verstehen',
+    tokens: 2500,
+    prompt: 'Erstelle eine authentische TELC B1 Leseverstehen Teil 3 Aufgabe mit echten Zeitungsanzeigen.\n\nAnforderungen für Anzeigen (a-l):\n- Jede Anzeige: 4-7 Zeilen, realistischer Zeitungsstil\n- Anzeigentypen: Stellenangebote, Wohnungen, Veranstaltungen, Dienstleistungen, Kurse, Partneranzeigen, Vereinsanzeigen\n- Mit konkreten Details: Telefonnummern, Preise, Adressen, Zeiten, Anforderungen, Konditionen\n- Nicht zu simpel — jede Anzeige hat spezifische Bedingungen\n\nAnforderungen für Situationen (11-20):\n- Jede Situation beschreibt eine Person mit MEHREREN spezifischen Anforderungen\n- Mindestens 2 Situationen haben keine passende Anzeige (cor:\"x\", pts:0)\n- Situationen 11-16 sind bewertet (pts:5), Situationen 17-20 nicht (pts:0)\n- Matching erfordert genaues Lesen — eine falsche Anzeige erfüllt nur MANCHE Bedingungen\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"ads":{"a":"Realistische Anzeige mit 4-7 Zeilen und konkreten Details wie Telefonnummer und Konditionen","b":"...","c":"...","d":"...","e":"...","f":"...","g":"...","h":"...","i":"...","j":"...","k":"...","l":"..."},"situations":[{"num":11,"text":"Spezifische Situation mit mehreren Anforderungen, die eine bestimmte Anzeige erfordern","cor":"c","pts":5},{"num":12,"text":"...","cor":"g","pts":5},{"num":13,"text":"...","cor":"a","pts":5},{"num":14,"text":"...","cor":"x","pts":0},{"num":15,"text":"...","cor":"f","pts":5},{"num":16,"text":"...","cor":"k","pts":5},{"num":17,"text":"...","cor":"x","pts":0},{"num":18,"text":"...","cor":"d","pts":0},{"num":19,"text":"...","cor":"i","pts":0},{"num":20,"text":"...","cor":"b","pts":0}]}'
+  },
+  sb1: {
+    label: 'Sprachbausteine Teil 1 - Grammatik',
+    tokens: 1400,
+    prompt: 'Erstelle eine authentische TELC B1 Sprachbausteine Teil 1 Aufgabe.\n\nAnforderungen:\n- Ein formeller Brief (Beschwerdebrief, Anfrage, Kündigung, Bewerbung): 180-220 Wörter\n- Kontext: Wohnung, Abonnement, Arbeitsstelle, Hotel, Behörde\n- 10 Lücken (21-30): Artikel, Pronomen, Präpositionen, Konjunktionen, Verbformen, Adjektivendungen\n- Jede Lücke: 3 Optionen (a/b/c), alle grammatisch plausibel, aber nur eine passt in Kontext UND Grammatik\n- Falsche Optionen sind häufige Lernerfehlern (z.B. \"dass/ob/weil\", \"seit/vor/nach\", \"Ihrem/Ihrer/Ihren\")\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"intro":"Vollständiger Briefkopf mit Absender, Empfänger, Datum und Betreff","letter":"Vollständiger Brieftext 180-220 Wörter mit (21) (22) (23) (24) (25) (26) (27) (28) (29) (30) an grammatisch anspruchsvollen Stellen. Lücken müssen in natürlichem Kontext eingebettet sein.","gaps":[{"num":21,"a":"falsche Option","b":"richtige Option","c":"falsche Option","cor":"b"},{"num":22,"a":"...","b":"...","c":"...","cor":"a"},{"num":23,"a":"...","b":"...","c":"...","cor":"c"},{"num":24,"a":"...","b":"...","c":"...","cor":"b"},{"num":25,"a":"...","b":"...","c":"...","cor":"a"},{"num":26,"a":"...","b":"...","c":"...","cor":"c"},{"num":27,"a":"...","b":"...","c":"...","cor":"b"},{"num":28,"a":"...","b":"...","c":"...","cor":"a"},{"num":29,"a":"...","b":"...","c":"...","cor":"c"},{"num":30,"a":"...","b":"...","c":"...","cor":"b"}]}'
+  },
+  sb2: {
+    label: 'Sprachbausteine Teil 2 - Lexik',
+    tokens: 1600,
+    prompt: 'Erstelle eine authentische TELC B1 Sprachbausteine Teil 2 Aufgabe.\n\nAnforderungen:\n- Formeller Brief: 160-190 Wörter (Anfrage, Bewerbung, Hotelreservierung, Kursanmeldung)\n- Genau 10 Lücken (31-40) an anspruchsvollen lexikalischen Stellen\n- Wortbank: genau 15 Wörter (a-o) — funktionale Wörter: Konnektoren (AUCH, AUSSERDEM, OBWOHL), Präpositionen (FÜR, NACH, MIT), Pronomen (SICH, MIR, IHNEN), Adverbien (BEREITS, LEIDER, GERNE), Konjunktionen (DASS, OB, WANN), Modalverben (MÖCHTE, KÖNNTEN, MÜSSEN)\n- Alle 15 Wörter passen grammatisch in MEHRERE Lücken — aber kontextuell nur in eine\n- Jedes Wort GROSSGESCHRIEBEN, wird genau einmal verwendet\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"intro":"Vollständiger Briefkopf","letter":"Formeller Brieftext 160-190 Wörter mit (31)(32)(33)(34)(35)(36)(37)(38)(39)(40) an anspruchsvollen Stellen. Kontext macht nur ein Wort aus der Wortbank eindeutig passend.","wordbank":{"a":"AUCH","b":"AUSSERDEM","c":"BEREITS","d":"DASS","e":"FÜR","f":"GERNE","g":"KÖNNTEN","h":"LEIDER","i":"MIT","j":"MÖCHTE","k":"MÜSSEN","l":"NACH","m":"OB","n":"SICH","o":"WANN"},"gaps":[{"num":31,"cor":"a"},{"num":32,"cor":"b"},{"num":33,"cor":"c"},{"num":34,"cor":"d"},{"num":35,"cor":"e"},{"num":36,"cor":"f"},{"num":37,"cor":"g"},{"num":38,"cor":"h"},{"num":39,"cor":"i"},{"num":40,"cor":"j"}]}'
+  },
+  hv1p: {
+    label: 'Hörverstehen Teil 1',
+    tokens: 1400,
+    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 1. Antworte mit REINEM JSON, KEINE Backticks.\n\nEin gemeinsames Thema, 5 Personen sprechen darueber (je 60-90 Woerter natuerliche gesprochene Sprache).\n\n{"t1theme":"Thema","t1":[{"num":41,"stmt":"Paraphrase als R/F-Aussage","audio":"Monolog 60-90 Woerter","cor":"+"},{"num":42,"stmt":"...","audio":"...","cor":"-"},{"num":43,"stmt":"...","audio":"...","cor":"+"},{"num":44,"stmt":"...","audio":"...","cor":"+"},{"num":45,"stmt":"...","audio":"...","cor":"-"}]}'
+  },
+  hv2p: {
+    label: 'Hörverstehen Teil 2',
+    tokens: 1800,
+    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 2 Interview. Antworte mit REINEM JSON, KEINE Backticks.\n\n14 Redebeitraege abwechselnd Moderator/Gast (Gast antwortet je 40-60 Woerter), 10 R/F Aussagen.\n\n{"t2":{"dialogue":[{"spk":"Moderator","txt":"Frage ca 30 Woerter"},{"spk":"Gast","txt":"Antwort 40-60 Woerter"},{"spk":"Moderator","txt":"..."},{"spk":"Gast","txt":"..."},{"spk":"Moderator","txt":"..."},{"spk":"Gast","txt":"..."},{"spk":"Moderator","txt":"..."},{"spk":"Gast","txt":"..."},{"spk":"Moderator","txt":"..."},{"spk":"Gast","txt":"..."},{"spk":"Moderator","txt":"..."},{"spk":"Gast","txt":"..."},{"spk":"Moderator","txt":"..."},{"spk":"Gast","txt":"..."}],"stmts":[{"num":46,"stmt":"...","cor":"-"},{"num":47,"stmt":"...","cor":"+"},{"num":48,"stmt":"...","cor":"+"},{"num":49,"stmt":"...","cor":"-"},{"num":50,"stmt":"...","cor":"+"},{"num":51,"stmt":"...","cor":"-"},{"num":52,"stmt":"...","cor":"+"},{"num":53,"stmt":"...","cor":"-"},{"num":54,"stmt":"...","cor":"+"},{"num":55,"stmt":"...","cor":"+"}]}}'
+  },
+  hv3p: {
+    label: 'Hörverstehen Teil 3',
+    tokens: 1000,
+    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 3. Antworte mit REINEM JSON, KEINE Backticks.\n\n5 Durchsagen aus verschiedenen Orten je 50-70 Woerter offizieller Ton, 5 R/F Aussagen.\n\n{"t3":[{"num":56,"stmt":"...","audio":"Durchsage 50-70 Woerter","cor":"-"},{"num":57,"stmt":"...","audio":"...","cor":"+"},{"num":58,"stmt":"...","audio":"...","cor":"+"},{"num":59,"stmt":"...","audio":"...","cor":"-"},{"num":60,"stmt":"...","audio":"...","cor":"+"}]}'
+  },
+  schreiben: {
+    label: 'Schriftlicher Ausdruck',
+    tokens: 600,
+    prompt: 'Erstelle eine authentische TELC B1 Schriftlicher Ausdruck Aufgabe.\n\nAnforderungen:\n- Ein persönlicher Brief oder eine E-Mail: 120-150 Wörter, natürlicher freundschaftlicher Ton\n- Absender hat eine konkrete Lebenssituation (neue Stadt, neue Stelle, Reise, Erlebnis)\n- Brief enthält eine direkte Frage oder Bitte an den Prüfling\n- 4 Leitpunkte: konkret, nicht zu allgemein, erfordern echten Inhalt\n- Leitpunkte bauen logisch aufeinander auf\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"sender":"Vorname (z.B. Thomas, Anna, Marco, Sophie)","letter":"Persönlicher Brief 120-150 Wörter. Natürlicher Ton, konkrete Situation, direkte Anrede, spezifische Fragen oder Bitten an den Prüfling. Endet mit Bitte um Antwort.","points":["Spezifischer Leitpunkt 1 der eine echte Antwort erfordert","Spezifischer Leitpunkt 2","Spezifischer Leitpunkt 3","Spezifischer Leitpunkt 4 der auf vorherige Punkte Bezug nimmt"]}'
+  }
+};
+
+function parseGenJSON(txt) {
+  // Step 0: normalize typographic/curly quotes to straight quotes
+  var clean = txt
+    .replace(/\u201e/g, '"').replace(/\u201c/g, '"').replace(/\u201d/g, '"')
+    .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
+    .replace(/[\u201e\u201c\u201d]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'");
+  // Step 1: strip markdown fences
+  clean = clean.replace(/```[a-zA-Z]*/g, '').replace(/```/g, '').trim();
+
+  // Step 2: extract from first { to last }
+  var s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+  if (s === -1 || e === -1 || e < s) throw new Error('No JSON object found');
+  clean = clean.slice(s, e + 1);
+
+  // Step 3: remove trailing commas before } or ]
+  clean = clean.replace(/,}/g, '}').replace(/,]/g, ']');
+
+  // Step 4: first attempt
+  try { return JSON.parse(clean); } catch(e1) {
+
+    // Step 5: fix literal newlines and unescaped quotes inside string values
+    var out = '';
+    var inStr = false;
+    var esc = false;
+    var i = 0;
+    while (i < clean.length) {
+      var c = clean[i];
+      if (esc) { out += c; esc = false; i++; continue; }
+      if (c === '\\') { out += c; esc = true; i++; continue; }
+      if (c === '"') {
+        if (!inStr) {
+          // opening quote
+          inStr = true; out += c; i++; continue;
+        }
+        // could be closing quote OR unescaped internal quote
+        // peek ahead: after a closing quote we expect :, ,, }, ]
+        var j = i + 1;
+        while (j < clean.length && (clean[j] === ' ' || clean[j] === '\t' || clean[j] === '\n' || clean[j] === '\r')) j++;
+        var next = clean[j];
+        if (next === ':' || next === ',' || next === '}' || next === ']' || j >= clean.length) {
+          // legitimate closing quote
+          inStr = false; out += c; i++; continue;
+        } else {
+          // unescaped internal quote — escape it
+          out += '\\"'; i++; continue;
+        }
+      }
+      if (inStr) {
+        if (c === '\n') { out += '\\n'; i++; continue; }
+        if (c === '\r') { i++; continue; }
+      }
+      out += c; i++;
+    }
+
+    // Step 6: second attempt with fixed string
+    try { return JSON.parse(out); } catch(e2) {
+      // Step 7: last resort - remove all control chars
+      var safe = out.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+      try { return JSON.parse(safe); } catch(e3) {}
+    }
+  }
+  // Step 8: truncation recovery — close any open brackets/braces
+  try {
+    var s8 = clean.indexOf('{');
+    var partial = clean.slice(s8);
+    // Count open brackets to close them
+    var opens = [], i8 = 0;
+    var inS = false, es = false;
+    while (i8 < partial.length) {
+      var ch = partial[i8];
+      if (es) { es = false; i8++; continue; }
+      if (ch === '\\') { es = true; i8++; continue; }
+      if (ch === '"') { inS = !inS; i8++; continue; }
+      if (!inS) {
+        if (ch === '{' || ch === '[') opens.push(ch === '{' ? '}' : ']');
+        else if (ch === '}' || ch === ']') opens.pop();
+      }
+      i8++;
+    }
+    var closing = opens.reverse().join('');
+    var fixed8 = partial.replace(/,\s*$/, '') + closing;
+    return JSON.parse(fixed8);
+  } catch(e4) {
+    throw new Error('Unparseable JSON after all recovery attempts');
+  }
+}
+
+function extractText(d) {
+  // Handle both Gemini and Anthropic response formats
+  if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts)
+    return d.candidates[0].content.parts[0].text || '';
+  if (d.content && d.content[0]) return d.content[0].text || '';
+  return '';
+}
+
+function genFetch(type, cb) {
+  var sys = genSYS[type];
+  var seed = Math.random().toString(36).slice(2,8);
+  fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: sys.tokens,
+      temperature: 1.0,
+      system: 'Du bist TELC B1 Experte. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen ("). KEINE typografischen Anfuehrungszeichen wie \u201e\u201c oder \u2018\u2019. Neue, originelle Aufgaben. Seed: ' + seed,
+      messages: [{ role: 'user', content: sys.prompt }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) { console.warn('[genFetch] API error type:',type,'error:',JSON.stringify(d.error)); cb('API-Fehler: '+d.error.message, null); return; }
+    var txt = extractText(d);
+    if (!txt) { console.warn('[genFetch] Empty response type:',type,'full response:',JSON.stringify(d).slice(0,300)); cb('Leere Antwort ('+type+')', null); return; }
+    try { cb(null, parseGenJSON(txt)); }
+    catch(e) { console.warn('[genFetch] JSON parse failed type:',type); console.warn('Response:', txt.slice(0,500)); console.warn('Parse error:', e); cb('JSON-Fehler('+type+'): '+txt.slice(0,80), null); }
+  })
+  .catch(function(e) { cb('Netzwerkfehler: ' + e, null); });
+}
+
+// ── Inject functions: populate the simulator with new content ──
+
+function injectT1(data) {
+  // Replace headings
+  var headsEl = document.getElementById('t1-heads');
+  if (!headsEl) return;
+  var headsHtml = '';
+  var letters = ['a','b','c','d','e','f','g','h','i','j'];
+  letters.forEach(function(l) {
+    headsHtml += '<div class="t1-head"><span class="t1-lbl">' + l + '</span>' + escHtml(data.headings[l] || '') + '</div>';
+  });
+  headsEl.innerHTML = headsHtml;
+
+  // Replace texts + rewire buttons
+  var textsEl = document.getElementById('t1-texts');
+  if (!textsEl) return;
+  textsEl.innerHTML = '';
+  (data.texts || []).forEach(function(t) {
+    var item = document.createElement('div');
+    item.className = 't1-item';
+    item.setAttribute('data-cor', t.cor);
+    item.setAttribute('data-q', 't1-' + t.num);
+    item.setAttribute('data-pts', '5');
+    item.innerHTML = '<div class="t1-num">' + t.num + '</div>' +
+      '<div class="t1-body"><p>' + escHtml(t.body) + '</p></div>' +
+      '<div class="t1-choices" id="t1c-' + t.num + '"></div>' +
+      '<div class="t3-fb" id="t1fb-' + t.num + '"></div>';
+    textsEl.appendChild(item);
+    // Wire letter buttons
+    var box = item.querySelector('.t1-choices');
+    ['a','b','c','d','e','f','g','h','i','j'].forEach(function(lt) {
+      var btn = document.createElement('button');
+      btn.className = 't3-btn'; btn.textContent = lt;
+      btn.setAttribute('data-val', lt);
+      btn.addEventListener('click', function() {
+        box.querySelectorAll('.t3-btn').forEach(function(b) { b.classList.remove('t3-sel'); });
+        btn.classList.add('t3-sel');
+        item.dataset.chosen = lt;
+      });
+      box.appendChild(btn);
+    });
+  });
+}
+
+function injectT2(data) {
+  var block = document.getElementById('lesen2-block');
+  if (!block) return;
+  var html = '<div class="tc">' +
+    '<div class="tc-meta">Text · Lesen Sie den Text und die Aufgaben 6–10. Welche Lösung (a, b oder c) ist richtig?</div>' +
+    '<p class="tc-title">' + escHtml(data.title || '') + '</p>' +
+    '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2)">' + escHtml(data.article || '') + '</p>' +
+    '</div>';
+  (data.questions || []).forEach(function(q) {
+    html += '<div class="qb" data-type="mcq" data-cor="' + q.cor + '" data-sec="0" data-pts="5">' +
+      '<div class="qn">AUFGABE ' + q.num + ' · Detailverstehen</div>' +
+      '<div class="qt">' + escHtml(q.q) + '</div>' +
+      '<div class="opts">' +
+      '<label class="opt"><input type="radio" name="q' + q.num + '" value="a"><span class="ok">a</span>' + escHtml(q.a) + '</label>' +
+      '<label class="opt"><input type="radio" name="q' + q.num + '" value="b"><span class="ok">b</span>' + escHtml(q.b) + '</label>' +
+      '<label class="opt"><input type="radio" name="q' + q.num + '" value="c"><span class="ok">c</span>' + escHtml(q.c) + '</label>' +
+      '</div></div>';
+  });
+  block.innerHTML = html;
+  // Re-wire MCQ
+  block.querySelectorAll('.opt').forEach(function(o) {
+    o.addEventListener('click', function() {
+      if (done) return;
+      var nm = this.querySelector('input').name;
+      document.querySelectorAll('input[name="' + nm + '"]').forEach(function(r) { r.closest('.opt').classList.remove('sel'); });
+      this.classList.add('sel');
+      this.querySelector('input').checked = true;
+    });
+  });
+}
+
+function injectT3(data) {
+  // Replace ad cards
+  var adsEl = document.getElementById('t3-ads');
+  if (adsEl) {
+    var adsHtml = '';
+    var adLetters = ['a','b','c','d','e','f','g','h','i','j','k','l'];
+    adLetters.forEach(function(l) {
+      adsHtml += '<div class="t3-ad"><span class="t3-lbl">' + l + '</span><p>' + escHtml((data.ads || {})[l] || '') + '</p></div>';
+    });
+    adsEl.innerHTML = adsHtml;
+  }
+  // Replace situations
+  var sitsEl = document.getElementById('t3-situations');
+  if (!sitsEl) return;
+  sitsEl.innerHTML = '';
+  (data.situations || []).forEach(function(s) {
+    var sit = document.createElement('div');
+    sit.className = 't3-sit';
+    sit.setAttribute('data-cor', s.cor);
+    sit.setAttribute('data-q', s.num);
+    sit.setAttribute('data-pts', s.pts !== undefined ? s.pts : (s.num <= 16 ? 5 : 0));
+    var star = (s.pts > 0) ? ' <span class="t3-star">★</span>' : '';
+    sit.innerHTML = '<div class="t3-sit-num">' + s.num + star + '</div>' +
+      '<div class="t3-sit-text">' + escHtml(s.text) + '</div>' +
+      '<div class="t3-choices" id="t3c-' + s.num + '"></div>' +
+      '<div class="t3-fb" id="t3fb-' + s.num + '"></div>';
+    sitsEl.appendChild(sit);
+    // Wire letter buttons
+    var box = sit.querySelector('.t3-choices');
+    ['a','b','c','d','e','f','g','h','i','j','k','l','x'].forEach(function(lt) {
+      var btn = document.createElement('button');
+      btn.className = 't3-btn'; btn.textContent = lt;
+      btn.setAttribute('data-val', lt);
+      btn.addEventListener('click', function() {
+        box.querySelectorAll('.t3-btn').forEach(function(b) { b.classList.remove('t3-sel'); });
+        btn.classList.add('t3-sel');
+        sit.dataset.chosen = lt;
+      });
+      box.appendChild(btn);
+    });
+  });
+}
+
+function injectSB1(data) {
+  function boldGaps(txt, from, to) {
+    for (var n = from; n <= to; n++) txt = txt.split('(' + n + ')').join('<b style="color:var(--gold)">(' + n + ')</b>');
+    return txt;
+  }
+  var block = document.getElementById('sb1-content');
+  if (!block) return;
+  var html = '<div class="tc">' +
+    '<div class="tc-meta">Lesen Sie den Text und schließen Sie die Lücken 21–30. Welche Lösung (a, b oder c) ist richtig?</div>' +
+    '<p class="tc-title">' + escHtml(data.intro || '') + '</p>' +
+    '<p style="font-size:.88rem;line-height:2.1;color:var(--txt2)">' + boldGaps(escHtml(data.letter||''),21,30) + '</p>' +
+    '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">';
+  (data.gaps || []).forEach(function(g) {
+    html += '<div class="qb" data-type="mcq" data-cor="' + g.cor + '" data-sec="1" data-pts="1.5">' +
+      '<div class="qn">AUFGABE ' + g.num + '</div>' +
+      '<div class="qt">Lücke ' + g.num + '</div>' +
+      '<div class="opts">' +
+      '<label class="opt"><input type="radio" name="q' + g.num + '" value="a"><span class="ok">a</span>' + escHtml(g.a) + '</label>' +
+      '<label class="opt"><input type="radio" name="q' + g.num + '" value="b"><span class="ok">b</span>' + escHtml(g.b) + '</label>' +
+      '<label class="opt"><input type="radio" name="q' + g.num + '" value="c"><span class="ok">c</span>' + escHtml(g.c) + '</label>' +
+      '</div></div>';
+  });
+  html += '</div>';
+  block.innerHTML = html;
+  block.querySelectorAll('.opt').forEach(function(o) {
+    o.addEventListener('click', function() {
+      if (done) return;
+      var nm = this.querySelector('input').name;
+      document.querySelectorAll('input[name="' + nm + '"]').forEach(function(r) { r.closest('.opt').classList.remove('sel'); });
+      this.classList.add('sel');
+      this.querySelector('input').checked = true;
+    });
+  });
+}
+
+function injectSB2(data) {
+  function boldGaps2(txt, from, to) {
+    for (var n = from; n <= to; n++) txt = txt.split('(' + n + ')').join('<b style="color:var(--gold)">(' + n + ')</b>');
+    return txt;
+  }
+  var wbEl = document.getElementById('wb-gaps');
+  if (!wbEl) return;
+  var wbGrid = document.querySelector('.wb-grid');
+  if (wbGrid && data.wordbank) {
+    var wbHtml = '';
+    Object.keys(data.wordbank).sort().forEach(function(l) {
+      wbHtml += '<div class="wb-word" data-letter="' + l + '"><span class="wb-lbl">' + l + '</span>' + escHtml(data.wordbank[l]) + '</div>';
+    });
+    wbGrid.innerHTML = wbHtml;
+  }
+  wbEl.innerHTML = '';
+  (data.gaps || []).forEach(function(g) {
+    var gapDiv = document.createElement('div');
+    gapDiv.className = 'wb-gap';
+    gapDiv.setAttribute('data-gap', g.num);
+    gapDiv.setAttribute('data-cor', g.cor);
+    gapDiv.innerHTML = '<div class="wb-gap-num">Lucke ' + g.num + '</div><div class="wb-gap-choices" id="wbc-' + g.num + '"></div><div class="t3-fb" id="wbfb-' + g.num + '"></div>';
+    wbEl.appendChild(gapDiv);
+    var box = gapDiv.querySelector('.wb-gap-choices');
+    var chosen = null;
+    ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'].forEach(function(lt) {
+      var btn = document.createElement('button');
+      btn.className = 't3-btn'; btn.textContent = lt;
+      btn.addEventListener('click', function() {
+        if (chosen) {
+          var prev = document.querySelector('.wb-word[data-letter="' + chosen + '"]');
+          if (prev) prev.classList.remove('wb-used');
+          box.querySelectorAll('.t3-btn').forEach(function(b) { b.classList.remove('t3-sel'); });
+        }
+        chosen = lt; btn.classList.add('t3-sel');
+        var wd = document.querySelector('.wb-word[data-letter="' + lt + '"]');
+        if (wd) wd.classList.add('wb-used');
+        gapDiv.dataset.chosen = lt;
+      });
+      box.appendChild(btn);
+    });
+  });
+  if (data.letter) {
+    var lp = document.getElementById('sb2-letter-para');
+    if (lp) lp.innerHTML = boldGaps2(escHtml(data.letter), 31, 40);
+  }
+}
+
+function injectHV(data) {
+  if (data.t1 && data.t1.length) {
+    var cN=['f1','m1','f2','m2','f3'], sp=['female','male','female','male','female'];
+    ACFG.hv1.texts = data.t1.map(function(s,i){ return {num:s.num,text:s.audio,speaker:sp[i%5],charName:cN[i%5],rate:0.88,pitch:1.0}; });
+    ACFG.hv1.plays=0; ACFG.hv1.busy=false; ACFG.hv1.started=false;
+    ACFG.hv1.rule = buildHV1Rule(data.t1theme || data.theme || ACFG.hv1.theme || 'dem heutigen Thema');
+    data.t1.forEach(function(s){
+      var qbs=document.querySelectorAll('#s3 .qb[data-type="tf"]');
+      var idx=s.num-41; if(!qbs[idx])return;
+      qbs[idx].setAttribute('data-cor',s.cor);
+      var qt=qbs[idx].querySelector('.qt'); if(qt)qt.textContent=s.stmt;
+      qbs[idx].querySelectorAll('.rfb').forEach(function(b){b.classList.remove('sel','cor','wrg');});
+      var fb=qbs[idx].querySelector('.fb'); if(fb){fb.classList.remove('show');fb.textContent='';}
+    });
+  }
+  if (data.t2) {
+    var dlg=data.t2.dialogue||[];
+    ACFG.hv2.texts=dlg.map(function(d){
+      var mod=(d.spk||'').toLowerCase().indexOf('moderator')!==-1;
+      return {speaker:mod?'moderator':'guest',text:d.txt,rate:mod?0.90:0.87,pitch:1.0};
+    });
+    ACFG.hv2.plays=0; ACFG.hv2.busy=false; ACFG.hv2.started=false;
+    (data.t2.stmts||[]).forEach(function(s){
+      var qbs=document.querySelectorAll('#s3 .qb[data-type="tf"]');
+      var idx=s.num-41; if(!qbs[idx])return;
+      qbs[idx].setAttribute('data-cor',s.cor);
+      var qt=qbs[idx].querySelector('.qt'); if(qt)qt.textContent=s.stmt;
+      qbs[idx].querySelectorAll('.rfb').forEach(function(b){b.classList.remove('sel','cor','wrg');});
+      var fb=qbs[idx].querySelector('.fb'); if(fb){fb.classList.remove('show');fb.textContent='';}
+    });
+  }
+  if (data.t3 && data.t3.length) {
+    var ctxMap=[
+      {words:['bahnhof','gleis','zug','bahn'],ctx:'bahnhof'},
+      {words:['kunden','angebot','markt','kauf'],ctx:'kaufhaus'},
+      {words:['schule','kurs','unterricht','lehrer'],ctx:'schule'},
+      {words:['bibliothek','buch','auslei'],ctx:'bibliothek'},
+      {words:['konzert','theater','saal','musik'],ctx:'konzertsaal'}
+    ];
+    ACFG.hv3.texts=data.t3.map(function(s){
+      var lc=(s.audio||'').toLowerCase(), ctx='schule';
+      ctxMap.forEach(function(e){e.words.forEach(function(w){if(lc.indexOf(w)!==-1)ctx=e.ctx;});});
+      return {num:s.num,text:s.audio,rate:0.83,pitch:0.97,context:ctx};
+    });
+    ACFG.hv3.plays=0; ACFG.hv3.busy=false; ACFG.hv3.started=false;
+    data.t3.forEach(function(s){
+      var qbs=document.querySelectorAll('#s3 .qb[data-type="tf"]');
+      var idx=s.num-41; if(!qbs[idx])return;
+      qbs[idx].setAttribute('data-cor',s.cor);
+      var qt=qbs[idx].querySelector('.qt'); if(qt)qt.textContent=s.stmt;
+      qbs[idx].querySelectorAll('.rfb').forEach(function(b){b.classList.remove('sel','cor','wrg');});
+      var fb=qbs[idx].querySelector('.fb'); if(fb){fb.classList.remove('show');fb.textContent='';}
+    });
+  }
+  ['hv1','hv2','hv3'].forEach(function(id){
+    var btn=document.getElementById('tts-btn-'+id);
+    if(btn){btn.disabled=false;btn.textContent='Play (neu)';btn.classList.remove('playing');}
+    var track=document.getElementById('tts-track-'+id); if(track)track.textContent='Neue Fragen geladen';
+    var fill=document.getElementById('tts-fill-'+id); if(fill)fill.style.width='0%';
+  });
+  // Reset start button for new questions
+  var hvBtn = document.getElementById('hvStartBtn');
+  var hvNote = document.getElementById('hvStartNote');
+  if (hvBtn) { hvBtn.style.display = 'inline-block'; }
+  if (hvNote) { hvNote.style.display = 'block'; }
+  // If already on s3, reset so user can click again
+  if (typeof curS!=='undefined' && curS===3) {
+    // Don't auto-start - user must click the button (browser autoplay policy)
+  }
+}
+
+function injectSchreiben(data) {
+  var block = document.getElementById('schreiben-block');
+  if (!block) return;
+  var pts = (data.points || []);
+  var ptsList = pts.map(function(p) { return '<li>' + escHtml(p) + '</li>'; }).join('');
+  block.innerHTML =
+    '<div class="tc" style="border-left-color:var(--blue)">' +
+    '<div class="tc-meta">Sie haben folgende E-Mail / folgenden Brief erhalten:</div>' +
+    '<div style="font-size:.9rem;line-height:1.9;color:var(--txt2);font-style:italic;background:var(--bg);padding:1.1rem;border-left:3px solid rgba(74,124,220,.3)">' +
+    '<p>Liebe(r) ........</p>' +
+    '<p style="margin-top:.6rem">' + escHtml(data.letter || '') + '</p>' +
+    '<p style="margin-top:.6rem">Viele Grüße<br>' + escHtml(data.sender || '') + '</p>' +
+    '</div></div>' +
+    '<div class="wp" style="border-left-color:var(--gold)">' +
+    '<b>Aufgabe: Antworten Sie. Schreiben Sie etwas zu allen vier Punkten:</b>' +
+    '<ul>' + ptsList + '</ul>' +
+    '<p style="font-size:.8rem;color:var(--mut);margin-top:.7rem">Mindestens 100 Wörter. <b style="color:var(--txt2)">Vergessen Sie nicht Datum und Anrede.</b></p>' +
+    '</div>';
+
+  // Rebuild the single textarea below the task
+  var existing = document.getElementById('schreiben-input-area');
+  if (!existing) {
+    var inputArea = document.createElement('div');
+    inputArea.id = 'schreiben-input-area';
+    inputArea.innerHTML =
+      '<div style="margin:.8rem 0 .4rem;font-size:.82rem;color:var(--mut);font-family:\'JetBrains Mono\',monospace">Ihr Brief / Ihre E-Mail:</div>' +
+      
+      '<textarea id="wa1" rows="16" placeholder="" spellcheck="false" autocomplete="off" autocorrect="off" style="width:100%;background:var(--card);border:1px solid var(--bord);padding:.7rem .85rem;font-family:\'DM Sans\',sans-serif;font-size:.88rem;color:var(--txt);outline:none;resize:vertical;line-height:1.7;"></textarea>' +
+      '<div style="display:flex;justify-content:space-between;margin-top:.3rem"><span id="wc1" class="wc wlo">0 Wörter (Mindestens 100 Wörter)</span><span style="font-size:.72rem;color:var(--mut);font-style:italic">Tipp: Jeden Leitpunkt in einem eigenen Absatz</span></div>';
+    block.parentNode.insertBefore(inputArea, block.nextSibling);
+    // re-wire word count
+    var newWa = document.getElementById('wa1');
+    if (newWa) {
+      newWa.addEventListener('input', function(){ wcUpdate('wa1','wc1'); });
+      newWa.addEventListener('focus', function(){ this.style.borderColor='var(--gold)'; });
+      newWa.addEventListener('blur',  function(){ this.style.borderColor='var(--bord)'; });
+    }
+  } else {
+    var wa=document.getElementById('wa1'); if(wa)wa.value='';
+    var wc=document.getElementById('wc1'); if(wc){wc.textContent='0 Wörter (Mindestens 100 Wörter)';wc.className='wc wlo';}
+  }
+}
+
+// ── Main generate function ────────────────────────────────────────────────────
+function genQ(type) {
+  // Split 'hv' into 3 parallel sub-calls for speed
+  var allTypes = ['t1','t2','t3','sb1','sb2','hv1p','hv2p','hv3p','schreiben'];
+  var types = type === 'all' ? allTypes : (type === 'hv' ? ['hv1p','hv2p','hv3p'] : [type]);
+  var total = types.length;
+  var errors = [];
+  var completed = 0;
+
+  // Progress overlay
+  var overlay = document.createElement('div');
+  overlay.id = 'gen-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem';
+  overlay.innerHTML =
+    '<div style="background:var(--card);border:1px solid var(--gold);padding:2rem 3rem;text-align:center;max-width:420px;width:90%">' +
+    '<div style="font-size:2rem;margin-bottom:.5rem">⚡</div>' +
+    '<div style="font-size:1rem;font-weight:600;color:var(--gold);margin-bottom:.5rem">KI generiert neues Modellpaper</div>' +
+    '<div id="gen-status" style="font-size:.82rem;color:var(--mut)">Alle ' + total + ' Abschnitte gleichzeitig...</div>' +
+    '<div style="margin-top:1rem;background:var(--bg);height:6px;border-radius:3px">' +
+    '<div id="gen-pbar" style="height:6px;background:var(--gold);border-radius:3px;width:0%;transition:width .4s"></div>' +
+    '</div>' +
+    '<div id="gen-parts" style="margin-top:.8rem;font-size:.72rem;color:var(--mut);line-height:1.8"></div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  // Track per-section status
+  var partStatus = {};
+  types.forEach(function(t){ partStatus[t] = '⏳'; });
+
+  function updateParts() {
+    var st = document.getElementById('gen-parts');
+    if (st) st.innerHTML = types.map(function(t){
+      var label = (genSYS[t]||{}).label || t;
+      return partStatus[t] + ' ' + label;
+    }).join('<br>');
+    var pb = document.getElementById('gen-pbar');
+    if (pb) pb.style.width = Math.round(completed/total*100) + '%';
+    var gs = document.getElementById('gen-status');
+    if (gs) gs.textContent = completed + '/' + total + ' fertig...';
+  }
+
+  function finalize() {
+    var ov = document.getElementById('gen-overlay'); if(ov) ov.remove();
+    done = false;
+    if(typeof curS!=='undefined' && document.getElementById('exam') &&
+       document.getElementById('exam').style.display!=='none'){ goSec(0); }
+    var toast = document.createElement('div');
+    if(errors.length > 0) {
+      var names = errors.map(function(e){ return e.split(':')[0]; }).join(', ');
+      toast.style.cssText = 'position:fixed;top:5rem;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--red);color:var(--txt);padding:1rem 1.5rem;z-index:9999;font-size:.82rem;max-width:420px;width:90%;cursor:pointer;box-shadow:0 4px 20px #0004';
+      toast.innerHTML = '<b style="color:var(--red)">Fehler: '+(total-errors.length)+'/'+total+' Teile</b><br><span style="font-size:.78rem">'+names+'</span><br><span style="font-size:.72rem;color:var(--mut)">Klicken zum Schliessen</span>';
+      toast.addEventListener('click', function(){ toast.remove(); });
+    } else {
+      toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--grn);color:#fff;padding:.7rem 1.5rem;border-radius:2px;z-index:9999;font-size:.85rem;font-weight:600';
+      toast.textContent = 'Neues Modellpaper geladen!';
+      setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 3000);
+    }
+    document.body.appendChild(toast);
+  }
+
+  // Wrap genFetch in a Promise
+  function fetchSection(t) {
+    return new Promise(function(resolve) {
+      var sys = genSYS[t];
+      if (!sys) { resolve({ t: t, err: 'Unbekannter Typ: ' + t }); return; }
+      genFetch(t, function(err, data) {
+        if (err) {
+          resolve({ t: t, err: err });
+        } else {
+          resolve({ t: t, data: data });
+        }
+      });
+    });
+  }
+
+  updateParts();
+
+  function runOne(t) {
+    return fetchSection(t).then(function(result) {
+      completed++;
+      if (result.err) {
+        partStatus[result.t] = '✗';
+        errors.push((genSYS[result.t]||{label:result.t}).label + ': ' + result.err);
+      } else {
+        partStatus[result.t] = '✓';
+        try {
+          var t2 = result.t, d = result.data;
+          if (t2==='t1') { injectT1(d); saveQuestion('t1',d); }
+          else if (t2==='t2') { injectT2(d); saveQuestion('t2',d); }
+          else if (t2==='t3') { injectT3(d); saveQuestion('t3',d); }
+          else if (t2==='sb1') { injectSB1(d); saveQuestion('sb1',d); }
+          else if (t2==='sb2') { injectSB2(d); saveQuestion('sb2',d); }
+          else if (t2==='hv1p'||t2==='hv2p'||t2==='hv3p') { injectHV(d); var hvk=t2==='hv1p'?'hvp1':t2==='hv2p'?'hvp2':'hvp3'; saveQuestion(hvk,d); }
+          else if (t2==='hv') { injectHV(d); saveQuestion('hv',d); }
+          else if (t2==='schreiben') { injectSchreiben(d); saveQuestion('schreiben',d); }
+        } catch(e2) {
+          partStatus[result.t] = '✗';
+          errors.push((genSYS[result.t]||{label:result.t}).label + ': inject error - ' + e2);
+        }
+      }
+      updateParts();
+    });
+  }
+
+  // Run in batches of 3 with 600ms gap to avoid rate limit
+  var batches = [];
+  for (var b = 0; b < types.length; b += 3) {
+    batches.push(types.slice(b, b + 3));
+  }
+
+  function runBatch(idx) {
+    if (idx >= batches.length) { finalize(); return; }
+    var batch = batches[idx];
+    Promise.all(batch.map(runOne)).then(function() {
+      setTimeout(function() { runBatch(idx + 1); }, 300);
+    });
+  }
+
+  runBatch(0);
+}
+
+
+
+
+var genPlays={};
+
+
+function escHtml(s){
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── T3 LETTER BUTTONS (Selektives Verstehen) ─────────────────────────────────
+(function(){
+  var letters=['a','b','c','d','e','f','g','h','i','j','k','l','x'];
+  document.querySelectorAll('.t3-sit').forEach(function(sit){
+    var q=sit.dataset.q,cor=sit.dataset.cor;
+    var box=document.getElementById('t3c-'+q);
+    if(!box)return;
+    letters.forEach(function(lt){
+      var btn=document.createElement('button');
+      btn.className='t3-btn';btn.textContent=lt;btn.setAttribute('data-val',lt);
+      btn.addEventListener('click',function(){
+        box.querySelectorAll('.t3-btn').forEach(function(b){b.classList.remove('t3-sel');});
+        btn.classList.add('t3-sel');
+        sit.dataset.chosen=lt;
+      });
+      box.appendChild(btn);
+    });
+  });
+})();
+
+// ── T1 LETTER BUTTONS (Globalverstehen) ──────────────────────────────────────
+(function(){
+  var letters=['a','b','c','d','e','f','g','h','i','j'];
+  document.querySelectorAll('.t1-item').forEach(function(item){
+    var q=item.dataset.q,num=q.replace('t1-','');
+    var box=document.getElementById('t1c-'+num);
+    if(!box)return;
+    letters.forEach(function(lt){
+      var btn=document.createElement('button');
+      btn.className='t3-btn';btn.textContent=lt;btn.setAttribute('data-val',lt);
+      btn.addEventListener('click',function(){
+        box.querySelectorAll('.t3-btn').forEach(function(b){b.classList.remove('t3-sel');});
+        btn.classList.add('t3-sel');
+        item.dataset.chosen=lt;
+      });
+      box.appendChild(btn);
+    });
+  });
+})();
+
+// ── WORTBANK LETTER BUTTONS (SB Teil 2) ──────────────────────────────────────
+(function(){
+  var wbLetters=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'];
+  document.querySelectorAll('.wb-gap').forEach(function(gap){
+    var gn=gap.dataset.gap,cor=gap.dataset.cor;
+    var box=document.getElementById('wbc-'+gn);
+    if(!box)return;
+    var chosen=null;
+    wbLetters.forEach(function(lt){
+      var btn=document.createElement('button');
+      btn.className='t3-btn';btn.textContent=lt;btn.setAttribute('data-val',lt);
+      btn.addEventListener('click',function(){
+        if(chosen){
+          var prev=document.querySelector('.wb-word[data-letter="'+chosen+'"]');
+          if(prev)prev.classList.remove('wb-used');
+          box.querySelectorAll('.t3-btn').forEach(function(b){b.classList.remove('t3-sel');});
+        }
+        chosen=lt;btn.classList.add('t3-sel');
+        var wd=document.querySelector('.wb-word[data-letter="'+lt+'"]');
+        if(wd)wd.classList.add('wb-used');
+        gap.dataset.chosen=lt;
+      });
+      box.appendChild(btn);
+    });
+  });
+})();
+
+
+function _stopAllAudio() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  _stopAmbient();
+  if (_ac) { try { _ac.close(); } catch(e) {} _ac = null; }
+}
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') _stopAllAudio();
+});
+window.addEventListener('beforeunload', function() { _stopAllAudio(); });
+window.addEventListener('pagehide', function() { _stopAllAudio(); });
+
+function hvStart() {
+  var btn = document.getElementById('hvStartBtn');
+  var note = document.getElementById('hvStartNote');
+  if (btn) btn.style.display = 'none';
+  if (note) note.style.display = 'none';
+  runAllHoerverstehen();
+}
+
+async function runAllHoerverstehen() {
+  window.scrollTo(0,0);
+  await ttsStartAsync('hv1');
+  setTrack('hv1','Teil 1 abgeschlossen. Teil 2 beginnt...');
+  await pause(2500);
+  await ttsStartAsync('hv2');
+  setTrack('hv2','Teil 2 abgeschlossen. Teil 3 beginnt...');
+  await pause(2500);
+  await ttsStartAsync('hv3');
+  setTrack('hv3','Hoerverstehen abgeschlossen.');
+}
+
+function buildHV1Rule(theme) {
+  // Update the visible description text in the UI
+  var desc = document.getElementById('hv1-desc');
+  if (desc) desc.textContent = 'Fünf Personen sprechen über das Thema ' + theme + '. Nur einmal. Jede Aussage wird mit Nummer angekündigt.';
+  return 'Hoerverstehen, Teil eins. Das Thema heute: ' + theme +
+    '. Wir haben fuenf Personen nach ihrer Meinung gefragt.' +
+    ' Sie hoeren die Antworten nur einmal.' +
+    ' Entscheiden Sie: Sind die Aussagen 41 bis 45 richtig oder falsch?' +
+    ' Sie haben 30 Sekunden Zeit, die Aufgaben zu lesen.';
+}
+
+function ttsStartAsync(id) {
+  return new Promise(function(resolve){
+    var c=ACFG[id];
+    if(!c||c.busy||c.plays>=c.maxP){resolve();return;}
+    if(c.started){resolve();return;}
+    c.busy=true; c.started=true;
+    setBtn(id,'Anweisung...',true,false);
+    setTrack(id,'Anweisung wird vorgelesen...');
+    speak(c.rule,{rate:0.84,pitch:1.0,voice:_slots[0]||null,pauseAfter:600})
+    .then(function(){
+      setBtn(id,'Lesezeit: '+c.rsecs+'s',true,false);
+      setTrack(id,'Lesen Sie jetzt die Aufgaben!');
+      return runReadtime(id,c.rsecs);
+    }).then(function(){
+      setBtn(id,'Laeuft...',true,true);
+      if(id==='hv1')return playHV1(c);
+      if(id==='hv2')return playHV2(c);
+      if(id==='hv3')return playHV3(c);
+    }).then(function(){c.busy=false;resolve();})
+    .catch(function(e){setTrack(id,'Fehler: '+e);c.busy=false;resolve();});
+  });
+}
+})();
+
+</script>
+</body>
+</html>
