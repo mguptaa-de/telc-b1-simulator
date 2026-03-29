@@ -2211,7 +2211,7 @@ var genSYS = {
   },
   t3: {
     label: 'Lesen Teil 3 - Selektives Verstehen',
-    tokens: 2500,
+    tokens: 3500,
     prompt: 'Erstelle eine authentische TELC B1 Leseverstehen Teil 3 Aufgabe mit echten Zeitungsanzeigen.\n\nAnforderungen für Anzeigen (a-l):\n- Jede Anzeige: 4-7 Zeilen, realistischer Zeitungsstil\n- Anzeigentypen: Stellenangebote, Wohnungen, Veranstaltungen, Dienstleistungen, Kurse, Partneranzeigen, Vereinsanzeigen\n- Mit konkreten Details: Telefonnummern, Preise, Adressen, Zeiten, Anforderungen, Konditionen\n- Nicht zu simpel — jede Anzeige hat spezifische Bedingungen\n\nAnforderungen für Situationen (11-20):\n- Jede Situation beschreibt eine Person mit MEHREREN spezifischen Anforderungen\n- Mindestens 2 Situationen haben keine passende Anzeige (cor:\"x\", pts:0)\n- Situationen 11-16 sind bewertet (pts:5), Situationen 17-20 nicht (pts:0)\n- Matching erfordert genaues Lesen — eine falsche Anzeige erfüllt nur MANCHE Bedingungen\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"ads":{"a":"Realistische Anzeige mit 4-7 Zeilen und konkreten Details wie Telefonnummer und Konditionen","b":"...","c":"...","d":"...","e":"...","f":"...","g":"...","h":"...","i":"...","j":"...","k":"...","l":"..."},"situations":[{"num":11,"text":"Spezifische Situation mit mehreren Anforderungen, die eine bestimmte Anzeige erfordern","cor":"c","pts":5},{"num":12,"text":"...","cor":"g","pts":5},{"num":13,"text":"...","cor":"a","pts":5},{"num":14,"text":"...","cor":"x","pts":0},{"num":15,"text":"...","cor":"f","pts":5},{"num":16,"text":"...","cor":"k","pts":5},{"num":17,"text":"...","cor":"x","pts":0},{"num":18,"text":"...","cor":"d","pts":0},{"num":19,"text":"...","cor":"i","pts":0},{"num":20,"text":"...","cor":"b","pts":0}]}'
   },
   sb1: {
