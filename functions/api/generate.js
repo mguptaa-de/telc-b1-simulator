@@ -3,7 +3,7 @@ export async function onRequestPost(context) {
 
   if (!GEMINI_API_KEY) {
     return new Response(JSON.stringify({
-      error: { message: 'GEMINI_API_KEY not set. Add it in Cloudflare Pages → Settings → Environment variables.' }
+      error: { message: 'GEMINI_API_KEY not set.' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
@@ -15,11 +15,10 @@ export async function onRequestPost(context) {
   }
 
   try {
-    // gemini-2.0-flash-001: stable, fast, free tier available
-    const model = 'gemini-2.0-flash-001';
+    // gemini-2.5-flash is confirmed available in your API key's model list
+    const model = 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Gemini is more verbose — use 3x token multiplier
     const maxTokens = Math.min((body.max_tokens || 1000) * 3, 8192);
 
     const geminiBody = {
@@ -32,7 +31,8 @@ export async function onRequestPost(context) {
       })),
       generationConfig: {
         maxOutputTokens: maxTokens,
-        temperature: body.temperature || 0.9
+        temperature: body.temperature || 0.9,
+        thinkingConfig: { thinkingBudget: 0 }
       }
     };
 
@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    // Extract text — skip thought parts if thinking mode is on
+    // Extract text — skip thought parts
     let responseText = '';
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       const parts = data.candidates[0].content.parts;
@@ -56,7 +56,7 @@ export async function onRequestPost(context) {
       }
     }
 
-    // Return in Anthropic-compatible format — index.html already knows how to parse this
+    // Return in Anthropic-compatible format
     if (responseText) {
       return new Response(JSON.stringify({
         content: [{ type: 'text', text: responseText }]
@@ -66,7 +66,7 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Pass through error from Gemini
+    // Pass through Gemini response (error etc)
     return new Response(JSON.stringify(data), {
       status: response.ok ? 200 : response.status,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
@@ -80,7 +80,6 @@ export async function onRequestPost(context) {
   }
 }
 
-// Handle CORS preflight
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
