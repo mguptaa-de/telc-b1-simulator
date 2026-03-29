@@ -15,10 +15,10 @@ export async function onRequestPost(context) {
   }
 
   try {
-    // gemini-2.5-flash is confirmed available in your API key's model list
     const model = 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
+    // 3x multiplier, cap at 8192 (gemini-2.5-flash output limit)
     const maxTokens = Math.min((body.max_tokens || 1000) * 3, 8192);
 
     const geminiBody = {
@@ -31,8 +31,8 @@ export async function onRequestPost(context) {
       })),
       generationConfig: {
         maxOutputTokens: maxTokens,
-        temperature: body.temperature || 0.9,
-        thinkingConfig: { thinkingBudget: 0 }
+        temperature: body.temperature || 0.9
+        // No thinkingConfig — let model decide, avoids errors on some token limits
       }
     };
 
@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    // Extract text — skip thought parts
+    // Extract text — skip thought parts if thinking mode activates
     let responseText = '';
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       const parts = data.candidates[0].content.parts;
@@ -66,7 +66,6 @@ export async function onRequestPost(context) {
       });
     }
 
-    // Pass through Gemini response (error etc)
     return new Response(JSON.stringify(data), {
       status: response.ok ? 200 : response.status,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
