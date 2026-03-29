@@ -2247,97 +2247,117 @@ var genSYS = {
 };
 
 function parseGenJSON(txt) {
-  // Step 0: normalize typographic/curly quotes to straight quotes
-  var clean = txt
-    .replace(/\u201e/g, '"').replace(/\u201c/g, '"').replace(/\u201d/g, '"')
-    .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
+  if (!txt) throw new Error('Empty input');
+
+  // Step 0a: strip Gemini thinking tags
+  var clean = txt.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+  // Step 0b: normalize curly/typographic quotes → straight
+  clean = clean
     .replace(/[\u201e\u201c\u201d]/g, '"')
     .replace(/[\u2018\u2019]/g, "'");
+
   // Step 1: strip markdown fences
   clean = clean.replace(/```[a-zA-Z]*/g, '').replace(/```/g, '').trim();
 
   // Step 2: extract from first { to last }
-  var s = clean.indexOf('{'), e = clean.lastIndexOf('}');
-  if (s === -1 || e === -1 || e < s) throw new Error('No JSON object found');
-  clean = clean.slice(s, e + 1);
+  var s = clean.indexOf('{');
+  var e = clean.lastIndexOf('}');
+  if (s === -1 || e === -1 || e <= s) throw new Error('No JSON object found');
+  var extracted = clean.slice(s, e + 1);
 
-  // Step 3: remove trailing commas before } or ]
-  clean = clean.replace(/,}/g, '}').replace(/,]/g, ']');
+  // Step 3: fix common Gemini issues
+  var fixed = extracted
+    .replace(/,\s*}/g, '}')      // trailing commas before }
+    .replace(/,\s*]/g, ']')      // trailing commas before ]
+    .replace(/:\s*,/g, ': null,') // empty values
+    .replace(/:\s*}/g, ': null}'); // empty values at end
 
-  // Step 4: first attempt
-  try { return JSON.parse(clean); } catch(e1) {
+  // Step 4: direct parse attempt
+  try { return JSON.parse(fixed); } catch(e1) {}
 
-    // Step 5: fix literal newlines and unescaped quotes inside string values
+  // Step 5: character-by-character string repair
+  function repairJSON(src) {
     var out = '';
     var inStr = false;
     var esc = false;
-    var i = 0;
-    while (i < clean.length) {
-      var c = clean[i];
-      if (esc) { out += c; esc = false; i++; continue; }
-      if (c === '\\') { out += c; esc = true; i++; continue; }
+    for (var i = 0; i < src.length; i++) {
+      var c = src[i];
+      if (esc) { out += c; esc = false; continue; }
+      if (c === '\\') { out += c; esc = true; continue; }
       if (c === '"') {
-        if (!inStr) {
-          // opening quote
-          inStr = true; out += c; i++; continue;
-        }
-        // could be closing quote OR unescaped internal quote
-        // peek ahead: after a closing quote we expect :, ,, }, ]
+        if (!inStr) { inStr = true; out += c; continue; }
+        // Check if this is a legitimate closing quote
         var j = i + 1;
-        while (j < clean.length && (clean[j] === ' ' || clean[j] === '\t' || clean[j] === '\n' || clean[j] === '\r')) j++;
-        var next = clean[j];
-        if (next === ':' || next === ',' || next === '}' || next === ']' || j >= clean.length) {
-          // legitimate closing quote
-          inStr = false; out += c; i++; continue;
+        while (j < src.length && /\s/.test(src[j])) j++;
+        var nx = src[j];
+        if (nx === ':' || nx === ',' || nx === '}' || nx === ']' || j >= src.length) {
+          inStr = false; out += c;
         } else {
-          // unescaped internal quote — escape it
-          out += '\\"'; i++; continue;
+          out += '\\"'; // escape internal quote
         }
+        continue;
       }
       if (inStr) {
-        if (c === '\n') { out += '\\n'; i++; continue; }
-        if (c === '\r') { i++; continue; }
+        if (c === '\n') { out += '\\n'; continue; }
+        if (c === '\r') { continue; }
+        if (c === '\t') { out += '\\t'; continue; }
+        // strip other control chars
+        if (c.charCodeAt(0) < 32) { continue; }
       }
-      out += c; i++;
+      out += c;
     }
+    return out;
+  }
 
-    // Step 6: second attempt with fixed string
-    try { return JSON.parse(out); } catch(e2) {
-      // Step 7: last resort - remove all control chars
-      var safe = out.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
-      try { return JSON.parse(safe); } catch(e3) {}
-    }
-  }
-  // Step 8: truncation recovery — close any open brackets/braces
-  try {
-    var s8 = clean.indexOf('{');
-    var partial = clean.slice(s8);
-    // Count open brackets to close them
-    var opens = [], i8 = 0;
+  var repaired = repairJSON(fixed);
+  // Remove trailing commas again after repair
+  repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
+
+  // Step 6: parse repaired
+  try { return JSON.parse(repaired); } catch(e2) {}
+
+  // Step 7: strip all control characters
+  var safe = repaired.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+  try { return JSON.parse(safe); } catch(e3) {}
+
+  // Step 8: truncation recovery — close unclosed brackets
+  function closeTruncated(src) {
+    var opens = [];
     var inS = false, es = false;
-    while (i8 < partial.length) {
-      var ch = partial[i8];
-      if (es) { es = false; i8++; continue; }
-      if (ch === '\\') { es = true; i8++; continue; }
-      if (ch === '"') { inS = !inS; i8++; continue; }
+    var last = 0; // last safe position (outside a string)
+    for (var i = 0; i < src.length; i++) {
+      var ch = src[i];
+      if (es) { es = false; continue; }
+      if (ch === '\\' && inS) { es = true; continue; }
+      if (ch === '"') { inS = !inS; if (!inS) last = i; continue; }
       if (!inS) {
-        if (ch === '{' || ch === '[') opens.push(ch === '{' ? '}' : ']');
-        else if (ch === '}' || ch === ']') opens.pop();
+        if (ch === '{' || ch === '[') { opens.push(ch === '{' ? '}' : ']'); last = i; }
+        else if (ch === '}' || ch === ']') { opens.pop(); last = i; }
       }
-      i8++;
     }
-    var closing = opens.reverse().join('');
-    var fixed8 = partial.replace(/,\s*$/, '') + closing;
-    return JSON.parse(fixed8);
-  } catch(e4) {
-    throw new Error('Unparseable JSON after all recovery attempts');
+    // Trim to last safe position
+    var trimmed = src.slice(0, last + 1).replace(/,\s*$/, '');
+    return trimmed + opens.reverse().join('');
   }
+
+  try { return JSON.parse(closeTruncated(safe)); } catch(e4) {}
+  try { return JSON.parse(closeTruncated(fixed)); } catch(e5) {}
+
+  throw new Error('Unparseable JSON after all recovery attempts');
 }
 
+
 function extractText(d) {
-  // Handle both Gemini and Anthropic response formats
-  if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts)
-    return d.candidates[0].content.parts[0].text || '';
+  // Gemini format — skip thought parts, return last non-thought text part
+  if (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) {
+    var parts = d.candidates[0].content.parts;
+    for (var i = parts.length - 1; i >= 0; i--) {
+      if (!parts[i].thought && parts[i].text) return parts[i].text;
+    }
+    return parts[0].text || '';
+  }
+  // Anthropic format
   if (d.content && d.content[0]) return d.content[0].text || '';
   return '';
 }
