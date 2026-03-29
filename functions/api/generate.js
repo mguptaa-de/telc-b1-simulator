@@ -18,8 +18,9 @@ export async function onRequestPost(context) {
     const model = 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // 3x multiplier, cap at 8192 (gemini-2.5-flash output limit)
-    const maxTokens = Math.min((body.max_tokens || 1000) * 3, 8192);
+    // 3x multiplier capped at 8192, but T3 (3500 tokens) × 3 = 8192 which is the hard limit
+    // Use 2.5x instead so T3 gets 8750 → capped at 8192, other sections stay well under
+    const maxTokens = Math.min(Math.ceil((body.max_tokens || 1000) * 2.5), 8192);
 
     const geminiBody = {
       systemInstruction: {
@@ -31,8 +32,9 @@ export async function onRequestPost(context) {
       })),
       generationConfig: {
         maxOutputTokens: maxTokens,
-        temperature: body.temperature || 0.9
-        // No thinkingConfig — let model decide, avoids errors on some token limits
+        temperature: body.temperature || 0.9,
+        // Disable thinking — keeps responses fast and direct
+        thinkingConfig: { thinkingBudget: 0 }
       }
     };
 
@@ -44,7 +46,7 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    // Extract text — skip thought parts if thinking mode activates
+    // Extract text — skip thought parts
     let responseText = '';
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       const parts = data.candidates[0].content.parts;
