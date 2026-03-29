@@ -18,8 +18,9 @@ export async function onRequestPost(context) {
     const model = 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Always use maximum output tokens — sequential calls means no rate limit pressure
-    const maxTokens = 8192;
+    // gemini-2.5-flash supports up to 65536 output tokens
+    // Use full limit — no more truncation issues
+    const maxTokens = 65536;
 
     const geminiBody = {
       systemInstruction: {
