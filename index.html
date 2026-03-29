@@ -2788,15 +2788,15 @@ function genQ(type) {
 
   // Run in batches of 3 with 600ms gap to avoid rate limit
   var batches = [];
-  for (var b = 0; b < types.length; b += 3) {
-    batches.push(types.slice(b, b + 3));
+  for (var b = 0; b < types.length; b += 2) {
+    batches.push(types.slice(b, b + 2));
   }
 
   function runBatch(idx) {
     if (idx >= batches.length) { finalize(); return; }
     var batch = batches[idx];
     Promise.all(batch.map(runOne)).then(function() {
-      setTimeout(function() { runBatch(idx + 1); }, 300);
+      setTimeout(function() { runBatch(idx + 1); }, 1000);
     });
   }
 
