@@ -18,9 +18,8 @@ export async function onRequestPost(context) {
     const model = 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // 3x multiplier capped at 8192, but T3 (3500 tokens) × 3 = 8192 which is the hard limit
-    // Use 2.5x instead so T3 gets 8750 → capped at 8192, other sections stay well under
-    const maxTokens = Math.min(Math.ceil((body.max_tokens || 1000) * 2.5), 8192);
+    // Always use maximum output tokens — sequential calls means no rate limit pressure
+    const maxTokens = 8192;
 
     const geminiBody = {
       systemInstruction: {
@@ -33,7 +32,6 @@ export async function onRequestPost(context) {
       generationConfig: {
         maxOutputTokens: maxTokens,
         temperature: body.temperature || 0.9,
-        // Disable thinking — keeps responses fast and direct
         thinkingConfig: { thinkingBudget: 0 }
       }
     };
@@ -58,7 +56,6 @@ export async function onRequestPost(context) {
       }
     }
 
-    // Return in Anthropic-compatible format
     if (responseText) {
       return new Response(JSON.stringify({
         content: [{ type: 'text', text: responseText }]
