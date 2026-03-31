@@ -158,6 +158,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 .rh{padding:1.5rem;margin-bottom:1.2rem;text-align:center;color:var(--txt);}
 .rh.pass{background:var(--cbg);border:2px solid var(--grn);}
 .rh.fail{background:var(--rbg);border:2px solid var(--red);}
+
+/* ── Results page ── */
+#results{max-width:680px;margin:2rem auto;padding:0 1rem;}
+.rp{font-size:.95rem;color:var(--mut);display:block;margin:.3rem 0;}
+.rpct{font-size:.95rem;color:var(--mut);display:block;margin:.3rem 0;}
 </style>
 </head>
 <body>
@@ -2501,9 +2506,12 @@ function injectT2(data) {
     '<div class="tc-meta">Text · Lesen Sie den Text und die Aufgaben 6–10. Welche Lösung (a, b oder c) ist richtig?</div>' +
     '<p class="tc-title">' + escHtml(data.title || '') + '</p>' +
     (function(){
-      var paras = (data.article||'').split(/\n+/).filter(function(p){return p.trim();});
-      if(paras.length<=1) return '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2)">' + escHtml(data.article||'') + '</p>';
-      return paras.map(function(p){return '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2);margin-bottom:.6rem">' + escHtml(p.trim()) + '</p>';}).join('');
+      var txt = data.article || '';
+      var paras = txt.split(/\n+/).map(function(p){return p.trim();}).filter(Boolean);
+      if (paras.length <= 1) return '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2)">' + escHtml(txt) + '</p>';
+      return paras.map(function(p){
+        return '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2);margin-bottom:.5rem">' + escHtml(p) + '</p>';
+      }).join('');
     })() +
     '</div>';
   (data.questions || []).forEach(function(q) {
