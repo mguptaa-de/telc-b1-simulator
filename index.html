@@ -2271,8 +2271,8 @@ var genSYS = {
   },
   t2: {
     label: 'Lesen Teil 2 - Detailverstehen',
-    tokens: 1600,
-    prompt: 'Erstelle eine authentische TELC B1 Leseverstehen Teil 2 Aufgabe im Stil echter Zeitungsartikel.\n\nAnforderungen:\n- Artikel: 300-350 Wörter, journalistischer Stil, kohärenter Aufbau mit Einleitung/Hauptteil/Schluss\n- Themen: Beruf, Gesellschaft, Wissenschaft, Kultur, Reise, Menschen\n- 5 Aufgaben (6-10): Jede Aufgabe ist eine Aussage oder Frage mit 3 Optionen (a/b/c)\n- Optionen sind VOLLSTÄNDIGE, plausible Sätze — keine Einwortoption\n- Richtige Antwort erfordert Textverständnis, NICHT nur Schlüsselwortsuche\n- Falsche Optionen klingen plausibel, sind aber inhaltlich falsch oder nicht im Text belegt\n- Keine direkte Kopie von Textsätzen als Option — umformulieren!\n\nAntworte NUR mit rohem JSON-Objekt, kein Markdown:\n{"title":"Artikel-Überschrift — Unterüberschrift","article":"Vollständiger Artikel mit 350-400 Wörtern. Mehrere Absätze. Journalistischer Stil mit Quellenangaben, Zitaten, konkreten Fakten und Zahlen.","questions":[{"num":6,"q":"Aussage oder Frage zum Text...","a":"Plausible aber falsche Option als vollständiger Satz","b":"Korrekte Antwort als vollständiger Satz basierend auf dem Text","c":"Weitere plausible aber falsche Option","cor":"b"},{"num":7,"q":"...","a":"...","b":"...","c":"...","cor":"a"},{"num":8,"q":"...","a":"...","b":"...","c":"...","cor":"c"},{"num":9,"q":"...","a":"...","b":"...","c":"...","cor":"a"},{"num":10,"q":"...","a":"...","b":"...","c":"...","cor":"b"}]}'
+    tokens: 2000,
+    prompt: 'Erstelle eine TELC B1 Leseverstehen Teil 2 Aufgabe.\n\nAnforderungen:\n- Artikel: 220-260 Woerter, journalistischer Stil, 2-3 Absaetze, Thema aus Alltag/Beruf/Gesellschaft\n- 5 Multiple-Choice Aufgaben (Nr. 6-10), je 3 Optionen (a/b/c), richtige Antwort erfordert Textverstaendnis\n- Optionen: vollstaendige Saetze, plausibel aber nur eine korrekt\n\nAntworte NUR mit diesem JSON (kein Markdown, keine Erklaerungen):\n{"title":"Titel","article":"Artikeltext hier","questions":[{"num":6,"q":"Frage","a":"Option","b":"Option","c":"Option","cor":"a"},{"num":7,"q":"Frage","a":"Option","b":"Option","c":"Option","cor":"b"},{"num":8,"q":"Frage","a":"Option","b":"Option","c":"Option","cor":"c"},{"num":9,"q":"Frage","a":"Option","b":"Option","c":"Option","cor":"a"},{"num":10,"q":"Frage","a":"Option","b":"Option","c":"Option","cor":"b"}]}'
   },
   t3: {
     label: 'Lesen Teil 3 - Selektives Verstehen',
@@ -2390,7 +2390,7 @@ function parseGenJSON(txt) {
   function closeTruncated(src) {
     var opens = [];
     var inS = false, es = false;
-    var last = 0; // last safe position (outside a string)
+    var last = 0; // last safe position outside a string
     for (var i = 0; i < src.length; i++) {
       var ch = src[i];
       if (es) { es = false; continue; }
@@ -2401,7 +2401,16 @@ function parseGenJSON(txt) {
         else if (ch === '}' || ch === ']') { opens.pop(); last = i; }
       }
     }
-    // Trim to last safe position
+    if (inS) {
+      // We ended inside an open string — close it then close brackets
+      // Find the last complete word boundary to trim cleanly
+      var partial = src.slice(0, src.length);
+      // Remove trailing incomplete word/escape
+      partial = partial.replace(/\\[^\\"]*$/, ''); // trailing escape
+      partial = partial.trimRight();
+      // Add closing quote then close all brackets
+      return partial + '"' + opens.reverse().join('');
+    }
     var trimmed = src.slice(0, last + 1).replace(/,\s*$/, '');
     return trimmed + opens.reverse().join('');
   }
@@ -2427,7 +2436,7 @@ function extractText(d) {
   return '';
 }
 
-function genFetch(type, cb) {
+function genFetch(type, cb, _retry) {
   var sys = genSYS[type];
   var seed = Math.random().toString(36).slice(2,8);
   fetch('/api/generate', {
@@ -2440,7 +2449,7 @@ function genFetch(type, cb) {
       system: 'Du bist TELC B1 Pruefungsexperte. Erstelle Aufgaben streng auf TELC B1 Niveau mit folgendem Schwierigkeitsgrad: ' + (window.DIFFICULTY||'B1-Mittel') + '. '
       + 'B1-Einfach: Alltagswortschatz, kurze Saetze, vertraute Themen, sehr klare Struktur. '
       + 'B1-Mittel: Standard B1 TELC Niveau, typische Pruefungsaufgaben. '
-      + 'B1-Schwer: Anspruchsvollere B1 Texte, aber KEIN B2 Vokabular. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen ("). KEINE typografischen Anfuehrungszeichen. Neue, originelle Aufgaben. Seed: ' + seed,
+      + 'B1-Schwer: Anspruchsvollere B1 Texte, aber KEIN B2 Vokabular. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen (\"). KEINE typografischen Anfuehrungszeichen. Neue, originelle Aufgaben. Seed: ' + seed,
       messages: [{ role: 'user', content: sys.prompt }]
     })
   })
@@ -2448,11 +2457,25 @@ function genFetch(type, cb) {
   .then(function(d) {
     if (d.error) { console.warn('[genFetch] API error type:',type,'error:',JSON.stringify(d.error)); cb('API-Fehler: '+d.error.message, null); return; }
     var txt = extractText(d);
-    if (!txt) { console.warn('[genFetch] Empty response type:',type,'full response:',JSON.stringify(d).slice(0,300)); cb('Leere Antwort ('+type+')', null); return; }
+    if (!txt) { console.warn('[genFetch] Empty response type:',type); cb('Leere Antwort ('+type+')', null); return; }
     try { cb(null, parseGenJSON(txt)); }
-    catch(e) { console.warn('[genFetch] JSON parse failed type:',type); console.warn('Response:', txt.slice(0,500)); console.warn('Parse error:', e); cb('JSON-Fehler('+type+'): '+txt.slice(0,80), null); }
+    catch(e) {
+      console.warn('[genFetch] Parse failed type:',type,'preview:',txt.slice(0,200));
+      if (!_retry) {
+        console.warn('[genFetch] Auto-retrying ' + type + '...');
+        setTimeout(function(){ genFetch(type, cb, true); }, 2000);
+      } else {
+        cb('JSON-Fehler('+type+'): '+txt.slice(0,80), null);
+      }
+    }
   })
-  .catch(function(e) { cb('Netzwerkfehler: ' + e, null); });
+  .catch(function(e) {
+    if (!_retry) {
+      setTimeout(function(){ genFetch(type, cb, true); }, 2000);
+    } else {
+      cb('Netzwerkfehler: ' + e, null);
+    }
+  });
 }
 
 // ── Inject functions: populate the simulator with new content ──
