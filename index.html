@@ -2468,17 +2468,23 @@ function injectT3(data) {
     var adLetters = ['a','b','c','d','e','f','g','h','i','j','k','l'];
     adLetters.forEach(function(l) {
       var adText = (data.ads || {})[l] || '';
-      // Split ad text into headline (first sentence), body (middle), contact (last sentence with number/www)
-      var lines = adText.split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
-      var sentences = adText.replace(/\n/g,' ').split(/(?<=[.!?])\s+/).filter(Boolean);
-      if(sentences.length === 0) sentences = [adText];
-      // Detect contact line — contains phone/email/www/tel/0\d
+      // Split into sentences without lookbehind regex
+      var adNorm = adText.replace(/\n/g,' ').trim();
+      var adSents = [];
+      var adRem = adNorm;
+      while(adRem.length > 0) {
+        var mx = adRem.search(/[.!?]\s/);
+        if(mx === -1) { adSents.push(adRem.trim()); break; }
+        adSents.push(adRem.slice(0, mx+1).trim());
+        adRem = adRem.slice(mx+2).trim();
+      }
+      if(adSents.length === 0) adSents = [adNorm];
       var contactRe = /(?:tel|www|@|\d{4,}|mailto)/i;
       var contactIdx = -1;
-      for(var si=sentences.length-1;si>=0;si--){if(contactRe.test(sentences[si])){contactIdx=si;break;}}
-      var headline = sentences[0] || '';
-      var contact  = contactIdx > 0 ? sentences[contactIdx] : '';
-      var body     = sentences.slice(1, contactIdx>0 ? contactIdx : sentences.length).join(' ');
+      for(var si=adSents.length-1; si>=0; si--){ if(contactRe.test(adSents[si])){ contactIdx=si; break; } }
+      var headline = adSents[0] || '';
+      var contact  = contactIdx > 0 ? adSents[contactIdx] : '';
+      var body     = adSents.slice(1, contactIdx>0 ? contactIdx : adSents.length).join(' ');
       adsHtml += '<div class="t3-ad">'
         + '<span class="t3-lbl">' + l + '</span>'
         + '<span class="ad-headline">' + escHtml(headline) + '</span>'
