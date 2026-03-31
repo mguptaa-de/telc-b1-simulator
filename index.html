@@ -206,6 +206,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
   </div>
   <div class="cv-btns">
     <button class="start-btn" id="startBtn">Prüfung beginnen →</button>
+    <div style="display:flex;gap:.4rem;justify-content:center;margin-bottom:.3rem" id="diffBtns">
+    <span style="font-size:.72rem;color:var(--mut);align-self:center">Schwierigkeit:</span>
+    <button class="diff-btn" data-diff="B1-Einfach" style="padding:.3rem .7rem;font-size:.75rem;font-weight:600;border:1px solid var(--bord);background:var(--card);color:var(--txt);cursor:pointer;border-radius:2px">Einfach</button>
+    <button class="diff-btn active" data-diff="B1-Mittel" style="padding:.3rem .7rem;font-size:.75rem;font-weight:600;border:1px solid var(--gold);background:var(--gold);color:#fff;cursor:pointer;border-radius:2px">Mittel</button>
+    <button class="diff-btn" data-diff="B1-Schwer" style="padding:.3rem .7rem;font-size:.75rem;font-weight:600;border:1px solid var(--bord);background:var(--card);color:var(--txt);cursor:pointer;border-radius:2px">Schwer</button>
+  </div>
     <button class="gen-cover-btn" id="genCoverBtn" title="Generiert ein komplett neues Prüfungsset mit KI">⚡ Neues Modellpaper generieren</button>
     <button class="th-btn-c" id="thCoverBtn">☀️ Helles Design</button>
     <button class="gen-cover-btn" id="versionBtn" style="background:var(--card);border:1px solid var(--bord);color:var(--txt)">📋 Versionen</button>
@@ -290,11 +296,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
     <ul><li>Was es Neues bei Ihnen gibt</li><li>Was Sie selbst gerne in Ihrer Freizeit machen</li><li>Tipps für Sophie (wie man neue Leute kennenlernen kann)</li><li>Reaktion auf den Vorschlag (Wochenendbesuch)</li></ul>
     <p style="font-size:.8rem;color:var(--mut);margin-top:.7rem"><b style="color:var(--txt2)">Vergessen Sie nicht Datum und Anrede. Mindestens 100 Wörter.</b></p>
     </div></div>
-    <textarea id="wa1" rows="18" placeholder="" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" style="width:100%;background:var(--card);border:1px solid var(--bord);padding:1rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--txt);outline:none;resize:vertical;line-height:1.9;"></textarea>
-    <div style="display:flex;justify-content:space-between;margin-top:.3rem">
-      <span id="wc1" class="wc wlo">0 Wörter (Mindestens 100 Wörter)</span>
-      
-    </div>
+    
   </div><!-- /s2 -->
 
   <div class="sp" id="s3">
@@ -360,6 +362,17 @@ on('subBtn','click',submitExam);
 on('retryBtn','click',function(){location.reload();});
 on('pdfBtn','click',exportPDF);
 on('genCoverBtn','click',function(){ saveVersion(); genQ('all'); });
+  document.querySelectorAll('.diff-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      window.DIFFICULTY = this.getAttribute('data-diff');
+      document.querySelectorAll('.diff-btn').forEach(function(b){
+        var active = b.getAttribute('data-diff')===window.DIFFICULTY;
+        b.style.background = active?'var(--gold)':'var(--card)';
+        b.style.color = active?'#fff':'var(--txt)';
+        b.style.borderColor = active?'var(--gold)':'var(--bord)';
+      });
+    });
+  });
 on('hvStartBtn','click',function(){hvStart();});
 // Set initial hv1 description (deferred so ACFG is ready)
 setTimeout(function(){
@@ -615,14 +628,22 @@ if (window.speechSynthesis) {
 // Character profiles: pitch/rate per named role
 // Pitch manipulation is the KEY differentiator when only 1-2 voices are available
 var CHAR_PROFILES = {
-  announcer: { slot:0, pitch:1.04, rate:0.83 },
-  f1:        { slot:1, pitch:1.22, rate:0.91 },  // young woman – noticeably higher
-  f2:        { slot:2, pitch:1.08, rate:0.86 },  // middle-aged woman
-  f3:        { slot:3, pitch:1.15, rate:0.88 },  // woman ~35
-  m1:        { slot:4, pitch:0.80, rate:0.83 },  // older man – clearly lower + slower
-  m2:        { slot:5, pitch:0.92, rate:0.89 },  // young man
-  moderator: { slot:6, pitch:1.03, rate:0.91 },  // neutral/professional
-  guest:     { slot:7, pitch:1.18, rate:0.87 }   // Maria – warm female
+  announcer:    { slot:0, pitch:1.02, rate:0.82, label:'Ansager'        },
+  f_young:      { slot:1, pitch:1.28, rate:0.94, label:'Junge Frau'     },  // very high pitch
+  f_middle:     { slot:2, pitch:1.08, rate:0.87, label:'Frau'           },  // standard woman
+  f_old:        { slot:2, pitch:0.96, rate:0.78, label:'Ältere Frau'    },  // lower + slow
+  m_young:      { slot:4, pitch:0.88, rate:0.93, label:'Junger Mann'    },  // slightly low
+  m_middle:     { slot:4, pitch:0.78, rate:0.86, label:'Mann'           },  // clearly lower
+  m_old:        { slot:4, pitch:0.66, rate:0.76, label:'Älterer Mann'   },  // very low + slow
+  child:        { slot:1, pitch:1.55, rate:1.05, label:'Kind'           },  // very high + fast
+  moderator:    { slot:6, pitch:1.05, rate:0.90, label:'Moderatorin'    },  // professional female
+  guest:        { slot:4, pitch:0.80, rate:0.85, label:'Gast'           },  // clearly male guest
+  // Legacy aliases
+  f1: { slot:1, pitch:1.28, rate:0.94 },
+  f2: { slot:2, pitch:1.08, rate:0.87 },
+  f3: { slot:2, pitch:0.96, rate:0.78 },
+  m1: { slot:4, pitch:0.66, rate:0.76 },
+  m2: { slot:4, pitch:0.88, rate:0.93 }
 };
 
 function speakAs(charName, text, pauseBefore, pauseAfter) {
@@ -1000,12 +1021,20 @@ async function playHV1(c) {
     });
     await pause(400);
     // Play the speaker text
-    // Use distinct pitch per speaker index for clear differentiation
-    var pitchArr = [1.20, 0.78, 1.08, 0.88, 1.14];
-    var rateArr  = [0.90, 0.83, 0.87, 0.89, 0.88];
+    // 5 distinct speaker profiles: young woman, old man, middle woman, young man, child
+    var hv1Profiles = [
+      CHAR_PROFILES.f_young,   // speaker 0: young woman
+      CHAR_PROFILES.m_old,     // speaker 1: older man
+      CHAR_PROFILES.f_middle,  // speaker 2: middle-aged woman
+      CHAR_PROFILES.m_young,   // speaker 3: young man
+      CHAR_PROFILES.child      // speaker 4: child/teenager
+    ];
+    var prof = hv1Profiles[i % 5];
+    // Pick voice slot based on profile — female slots for f/child, male slot for m
+    var isMaleProf = (i===1||i===3);
+    var hv1voice = isMaleProf ? (_slots[4]||_deVoices[0]||null) : (_slots[1]||_deVoices[0]||null);
     await speak(item.text, {
-      voice: (item.speaker==='female') ? (_slots[1]||_deVoices[0]||null) : (_slots[4]||_deVoices[0]||null),
-      pitch: pitchArr[i % 5], rate: rateArr[i % 5], vol:1.0,
+      voice: hv1voice, pitch: prof.pitch, rate: prof.rate, vol:1.0,
       pauseBefore:0, pauseAfter:1400
     });
     await pause(600);
@@ -1021,8 +1050,10 @@ async function playHV1(c) {
 async function playHV2once(c, playNum) {
   var dlg = c.texts; // [{speaker:'moderator'|'guest', text, rate, pitch}]
   var total = dlg.length;
-  var modVoice   = _slots[6] || (_deVoices[0]||null);  // moderator
-  var guestVoice = _slots[7] || (_deVoices[0]||null);  // guest
+  // Moderator: professional female voice (high pitch)
+  // Guest: clearly male voice (low pitch) for maximum contrast
+  var modVoice   = _slots[0] || (_deVoices[0]||null);   // moderator: female slot
+  var guestVoice = _slots[4] || (_deVoices[0]||null);   // guest: male slot
 
   for (var i = 0; i < total; i++) {
     var line = dlg[i];
@@ -1033,8 +1064,11 @@ async function playHV2once(c, playNum) {
 
     var voice = isMod ? modVoice : guestVoice;
     // Slight variations to sound more natural
-    var rate  = isMod ? 0.91 + (Math.random()*0.03) : 0.84 + (Math.random()*0.03);
-    var pitch = isMod ? 1.15 + (Math.random()*0.05) : 0.82 + (Math.random()*0.05);
+    // Very distinct profiles: moderator=high female, guest=low male
+    var modProf   = CHAR_PROFILES.moderator;
+    var guestProf = CHAR_PROFILES.guest;
+    var rate  = isMod ? modProf.rate  + (Math.random()*0.03-0.015) : guestProf.rate  + (Math.random()*0.03-0.015);
+    var pitch = isMod ? modProf.pitch + (Math.random()*0.04-0.02)  : guestProf.pitch + (Math.random()*0.04-0.02);
 
     await speak(line.text, {
       rate: rate, pitch: pitch, vol: 1.0, voice: voice,
@@ -1090,17 +1124,32 @@ async function playHV3(c) {
     setTrack('hv3', 'Durchsage ' + numWord + ' (' + (i+1) + '/' + total + ')');
     setFill('hv3', (i / total) * 100);
 
-    // Announce question number
-    await speak('Aufgabe ' + numWord + '.', {
-      rate: 0.80, pitch: 1.0, vol: 1.0,
-      voice: announcerVoice, pauseAfter: 700
+    // "Lesen Sie jetzt Aufgabe X." then 6 second silent pause
+    await speak('Lesen Sie jetzt Aufgabe ' + numWord + '.', {
+      rate: 0.82, pitch: 1.0, vol: 1.0,
+      voice: announcerVoice, pauseAfter: 200
     });
+    await pause(6000);
 
     // Determine voice style based on type of announcement
-    var annVoice = _slots[0] || (_deVoices[0]||null);
-    var ctxPitch = {bahnhof:0.92, kaufhaus:1.05, schule:1.08, bibliothek:0.95, konzertsaal:0.90};
-    var annRate  = item.rate || 0.83;
-    var annPitch = ctxPitch[item.context] || item.pitch || 0.95;
+    // Different voice profile per announcement context
+    var hv3CtxProfile = {
+      bahnhof:     CHAR_PROFILES.m_middle,   // train station: male announcer
+      kaufhaus:    CHAR_PROFILES.f_young,    // department store: young female
+      schule:      CHAR_PROFILES.f_middle,   // school: female teacher
+      bibliothek:  CHAR_PROFILES.f_old,      // library: older female
+      konzertsaal: CHAR_PROFILES.m_old,      // concert hall: older male
+      arzt:        CHAR_PROFILES.f_middle,   // doctor: female
+      krankenhaus: CHAR_PROFILES.f_middle,   // hospital: female
+      airport:     CHAR_PROFILES.m_middle    // airport: male
+    };
+    var ctxProf  = hv3CtxProfile[item.context] || CHAR_PROFILES.f_middle;
+    var annSlot  = (ctxProf === CHAR_PROFILES.m_middle || ctxProf === CHAR_PROFILES.m_old)
+                   ? (_slots[4]||_deVoices[0]||null)
+                   : (_slots[1]||_deVoices[0]||null);
+    var annVoice = annSlot;
+    var annRate  = ctxProf.rate  + (item.rate  ? item.rate  - 0.83 : 0);
+    var annPitch = ctxProf.pitch + (item.pitch ? item.pitch - 0.95 : 0);
 
     // First play
     await speak(item.text, {
@@ -1110,10 +1159,10 @@ async function playHV3(c) {
 
     await pause(500);
 
-    // Announce repeat
-    await speak('Noch einmal.', {
+    // "Sie hören den Text noch einmal."
+    await speak('Sie hören den Text noch einmal.', {
       rate: 0.82, pitch: 1.0, vol: 1.0,
-      voice: announcerVoice, pauseAfter: 600
+      voice: announcerVoice, pauseAfter: 400
     });
 
     // Second play (slightly different rate for naturalness)
@@ -1122,7 +1171,7 @@ async function playHV3(c) {
       voice: annVoice, pauseAfter: 1400
     });
 
-    await pause(800);
+    await pause(5000);
   }
   _stopAmbient();
   setFill('hv3', 100);
@@ -2188,7 +2237,7 @@ var ACFG={
   hv2:{maxP:2,rsecs:60,plays:0,started:false,busy:false,
     rule:"Hörverstehen, Teil zwei. Sie hören jetzt ein Interview. Es wird zweimal abgespielt. Entscheiden Sie: Sind die Aussagen 46 bis 55 richtig oder falsch? Sie haben eine Minute Zeit, die Aufgaben zu lesen.",
     texts:[{"speaker": "moderator", "text": "Guten Tag, Frau Steinberg. Schön, dass Sie Zeit für uns haben. Sie sind Köchin – wie sind Sie dazu gekommen?", "rate": 0.9, "pitch": 1.02}, {"speaker": "guest", "text": "Guten Tag! Gerne. Also, ich habe das gar nicht gelernt, ehrlich gesagt. Ich hab Betriebswirtschaft studiert und dann irgendwann gemerkt – das ist nicht mein Weg. Kochen war immer meine Leidenschaft, und ich habe einfach angefangen.", "rate": 0.87, "pitch": 1.1}, {"speaker": "moderator", "text": "Interessant. Und heute haben Sie Ihr eigenes Restaurant?", "rate": 0.91, "pitch": 1.0}, {"speaker": "guest", "text": "Ja, seit vier Jahren. Es ist klein, zwanzig Plätze, aber es ist meins. Ich habe alles selbst aufgebaut, das Konzept, die Karte, alles. Das macht mich sehr stolz.", "rate": 0.86, "pitch": 1.12}, {"speaker": "moderator", "text": "Die Arbeitszeiten in der Gastronomie sind ja bekannt schwierig. Wie erleben Sie das?", "rate": 0.9, "pitch": 1.01}, {"speaker": "guest", "text": "Das ist tatsächlich das Härteste an diesem Beruf. Freitag, Samstag, Feiertage – genau dann, wenn andere frei haben, stehe ich in der Küche. Das ist manchmal wirklich nicht einfach für das Privatleben.", "rate": 0.85, "pitch": 1.08}, {"speaker": "moderator", "text": "Kochen Sie privat auch so aufwendig wie im Restaurant?", "rate": 0.91, "pitch": 1.0}, {"speaker": "guest", "text": "Nein, nein! Zuhause mache ich ganz einfache Sachen. Pasta, Suppe, Omelette. Nach einem langen Abend in der Küche möchte ich nichts Kompliziertes mehr. Das ist genau wie bei einem Friseur – der schneidet sich selbst die Haare nie so perfekt.", "rate": 0.88, "pitch": 1.15}, {"speaker": "moderator", "text": "Was ist Ihnen bei den Zutaten wichtig?", "rate": 0.9, "pitch": 1.02}, {"speaker": "guest", "text": "Ich arbeite fast ausschließlich mit Produkten aus der Region. Der Bauer, der meine Tomaten anbaut, wohnt fünfzehn Kilometer von hier. Das schmeckt man, und es ist gut für die Umwelt. Das ist mir wirklich sehr wichtig.", "rate": 0.86, "pitch": 1.09}, {"speaker": "moderator", "text": "Haben Sie viele Mitarbeiter?", "rate": 0.91, "pitch": 1.01}, {"speaker": "guest", "text": "Nein, es sind wirklich wenige. Ich habe eine Aushilfe in der Küche und zwei Servicekräfte. Das war eine bewusste Entscheidung – klein bleiben, Qualität vor Quantität.", "rate": 0.87, "pitch": 1.11}, {"speaker": "moderator", "text": "Haben Sie Träume oder Pläne für die Zukunft?", "rate": 0.9, "pitch": 1.0}, {"speaker": "guest", "text": "Oh ja. Ich möchte unbedingt mehr reisen – Japan, Mexiko, Marokko. Nicht als Tourist, sondern um zu lernen, wie die Menschen dort kochen. Diese Einflüsse möchte ich dann in meine Küche bringen.", "rate": 0.85, "pitch": 1.13}, {"speaker": "moderator", "text": "Ist Ihr Restaurant denn jeden Tag geöffnet?", "rate": 0.91, "pitch": 1.02}, {"speaker": "guest", "text": "Nein, montags und dienstags haben wir geschlossen. Ich brauche diese Tage zur Regeneration. Und mein Team auch. Man kann nicht sieben Tage in der Woche auf höchstem Niveau kochen.", "rate": 0.88, "pitch": 1.08}, {"speaker": "moderator", "text": "Wie läuft das Restaurant – sind Sie zufrieden?", "rate": 0.9, "pitch": 1.01}, {"speaker": "guest", "text": "Ja, sehr. Wir sind meistens ausgebucht am Wochenende, und die Bewertungen sind gut. Ich habe nie gedacht, dass es so schnell so gut läuft. Es macht mich wirklich glücklich.", "rate": 0.86, "pitch": 1.14}, {"speaker": "moderator", "text": "Was würden Sie jungen Menschen raten, die in die Gastronomie wollen?", "rate": 0.91, "pitch": 1.0}, {"speaker": "guest", "text": "Ich sage immer: Wenn es eure Leidenschaft ist, dann macht es. Es ist harte Arbeit, lange Stunden, wenig Geld am Anfang. Aber wenn man es liebt, dann gibt es nichts Schöneres. Die Gastronomie ist wunderschön.", "rate": 0.85, "pitch": 1.1}]},
-  hv3:{maxP:2,rsecs:30,plays:0,started:false,busy:false,
+  hv3:{maxP:2,rsecs:0,plays:0,started:false,busy:false,
     rule:"Hörverstehen, Teil drei. Sie hören fünf kurze Texte. Jeder Text wird zweimal abgespielt. Entscheiden Sie: Sind die Aussagen 56 bis 60 richtig oder falsch? Sie haben 30 Sekunden Zeit.",
     texts:[{"num": 56, "text": "Achtung, eine Durchsage für Reisende des Intercity 847 nach München. Dieser Zug wird heute voraussichtlich zwanzig Minuten später als geplant abfahren. Wir bitten alle Fahrgäste, auf dem Bahnsteig auf weitere Ansagen zu warten. Wir entschuldigen uns für die Verzögerung.", "rate": 0.83, "pitch": 0.95}, {"num": 57, "text": "Herzlich willkommen bei Sport Braun. Nur heute, samstag, haben wir für Sie ein Sonderangebot: dreißig Prozent auf alle Winterjacken und Skibekleidung im Erdgeschoss. Das Angebot gilt solange der Vorrat reicht. Wir wünschen Ihnen viel Spaß beim Stöbern.", "rate": 0.83, "pitch": 0.95}, {"num": 58, "text": "Liebe Kursteilnehmer des Deutschkurses B1 beim Bildungszentrum Mitte. Wir müssen Ihnen leider mitteilen, dass der Kursstart auf den fünfzehnten verschoben wird. Bitte beachten Sie das neue Datum in Ihrer Kursbestätigung. Bei Fragen wenden Sie sich an unser Büro.", "rate": 0.83, "pitch": 0.95}, {"num": 59, "text": "Die Stadtbibliothek Westpark informiert: Unsere Öffnungszeiten sind montags bis freitags von neun bis neunzehn Uhr. Am Samstag sind wir von zehn bis fünfzehn Uhr für Sie geöffnet. Sonntags bleibt die Bibliothek geschlossen. Wir freuen uns auf Ihren Besuch.", "rate": 0.83, "pitch": 0.95}, {"num": 60, "text": "Sehr geehrte Gäste des heutigen Abendkonzerts. Wir möchten Sie darauf hinweisen, dass das Konzert aufgrund von Renovierungsarbeiten nicht im großen Saal, sondern im Kammermusiksaal im zweiten Obergeschoss stattfindet. Bitte folgen Sie den Hinweisschildern. Vielen Dank.", "rate": 0.83, "pitch": 0.95}]}
 };
@@ -2227,7 +2276,7 @@ var genSYS = {
   hv1p: {
     label: 'Hörverstehen Teil 1',
     tokens: 1400,
-    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 1. Antworte mit REINEM JSON, KEINE Backticks.\n\nEin gemeinsames Thema, 5 Personen sprechen darueber (je 60-90 Woerter natuerliche gesprochene Sprache).\n\n{"t1theme":"Thema","t1":[{"num":41,"stmt":"Paraphrase als R/F-Aussage","audio":"Monolog 60-90 Woerter","cor":"+"},{"num":42,"stmt":"...","audio":"...","cor":"-"},{"num":43,"stmt":"...","audio":"...","cor":"+"},{"num":44,"stmt":"...","audio":"...","cor":"+"},{"num":45,"stmt":"...","audio":"...","cor":"-"}]}'
+    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 1. Antworte mit REINEM JSON, KEINE Backticks.\n\nEin gemeinsames Thema, 5 Personen sprechen darueber (je 3-4 Saetze, max 60 Woerter, natuerliche gesprochene Sprache).\n\n{"t1theme":"Thema","t1":[{"num":41,"stmt":"Paraphrase als R/F-Aussage","audio":"Monolog 60-90 Woerter","cor":"+"},{"num":42,"stmt":"...","audio":"...","cor":"-"},{"num":43,"stmt":"...","audio":"...","cor":"+"},{"num":44,"stmt":"...","audio":"...","cor":"+"},{"num":45,"stmt":"...","audio":"...","cor":"-"}]}'
   },
   hv2p: {
     label: 'Hörverstehen Teil 2',
@@ -2237,7 +2286,7 @@ var genSYS = {
   hv3p: {
     label: 'Hörverstehen Teil 3',
     tokens: 1000,
-    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 3. Antworte mit REINEM JSON, KEINE Backticks.\n\n5 Durchsagen aus verschiedenen Orten je 50-70 Woerter offizieller Ton, 5 R/F Aussagen.\n\n{"t3":[{"num":56,"stmt":"...","audio":"Durchsage 50-70 Woerter","cor":"-"},{"num":57,"stmt":"...","audio":"...","cor":"+"},{"num":58,"stmt":"...","audio":"...","cor":"+"},{"num":59,"stmt":"...","audio":"...","cor":"-"},{"num":60,"stmt":"...","audio":"...","cor":"+"}]}'
+    prompt: 'Erstelle TELC B1 Hoerverstehen Teil 3. Antworte mit REINEM JSON, KEINE Backticks.\n\n5 Durchsagen aus verschiedenen Orten, je 3-4 Saetze max 50 Woerter, offizieller Ton, 5 R/F Aussagen.\n\n{"t3":[{"num":56,"stmt":"...","audio":"Durchsage 3-4 Saetze max 50 Woerter","cor":"-"},{"num":57,"stmt":"...","audio":"...","cor":"+"},{"num":58,"stmt":"...","audio":"...","cor":"+"},{"num":59,"stmt":"...","audio":"...","cor":"-"},{"num":60,"stmt":"...","audio":"...","cor":"+"}]}'
   },
   schreiben: {
     label: 'Schriftlicher Ausdruck',
@@ -2372,7 +2421,10 @@ function genFetch(type, cb) {
       model: 'claude-sonnet-4-20250514',
       max_tokens: sys.tokens,
       temperature: 1.0,
-      system: 'Du bist TELC B1 Experte. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen ("). KEINE typografischen Anfuehrungszeichen wie \u201e\u201c oder \u2018\u2019. Neue, originelle Aufgaben. Seed: ' + seed,
+      system: 'Du bist TELC B1 Pruefungsexperte. Erstelle Aufgaben streng auf TELC B1 Niveau mit folgendem Schwierigkeitsgrad: ' + (window.DIFFICULTY||'B1-Mittel') + '. '
+      + 'B1-Einfach: Alltagswortschatz, kurze Saetze, vertraute Themen, sehr klare Struktur. '
+      + 'B1-Mittel: Standard B1 TELC Niveau, typische Pruefungsaufgaben. '
+      + 'B1-Schwer: Anspruchsvollere B1 Texte, aber KEIN B2 Vokabular. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen ("). KEINE typografischen Anfuehrungszeichen. Neue, originelle Aufgaben. Seed: ' + seed,
       messages: [{ role: 'user', content: sys.prompt }]
     })
   })
@@ -2437,7 +2489,11 @@ function injectT2(data) {
   var html = '<div class="tc">' +
     '<div class="tc-meta">Text · Lesen Sie den Text und die Aufgaben 6–10. Welche Lösung (a, b oder c) ist richtig?</div>' +
     '<p class="tc-title">' + escHtml(data.title || '') + '</p>' +
-    '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2)">' + escHtml(data.article || '') + '</p>' +
+    (function(){
+      var paras = (data.article||'').split(/\n+/).filter(function(p){return p.trim();});
+      if(paras.length<=1) return '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2)">' + escHtml(data.article||'') + '</p>';
+      return paras.map(function(p){return '<p style="font-size:.88rem;line-height:1.8;color:var(--txt2);margin-bottom:.6rem">' + escHtml(p.trim()) + '</p>';}).join('');
+    })() +
     '</div>';
   (data.questions || []).forEach(function(q) {
     html += '<div class="qb" data-type="mcq" data-cor="' + q.cor + '" data-sec="0" data-pts="5">' +
