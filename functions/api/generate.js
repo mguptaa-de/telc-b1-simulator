@@ -15,11 +15,73 @@ export async function onRequestPost(context) {
   }
 
   try {
+    // ── TTS mode ─────────────────────────────────────────────────────────────
+    if (body.mode === 'tts') {
+      const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${GEMINI_API_KEY}`;
+
+      let speechConfig;
+
+      if (body.speakers && body.speakers.length === 2) {
+        // Multi-speaker mode (HV2 interview)
+        speechConfig = {
+          multiSpeakerVoiceConfig: {
+            speakerVoiceConfigs: body.speakers.map(s => ({
+              speaker: s.name,
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: s.voice } }
+            }))
+          }
+        };
+      } else {
+        // Single speaker mode
+        speechConfig = {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: body.voice || 'Kore' }
+          }
+        };
+      }
+
+      const ttsBody = {
+        contents: [{ parts: [{ text: body.text }] }],
+        generationConfig: {
+          responseModalities: ['AUDIO'],
+          speechConfig: speechConfig
+        }
+      };
+
+      const response = await fetch(ttsUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ttsBody)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        return new Response(JSON.stringify({ error: data.error || { message: 'TTS failed' } }), {
+          status: response.ok ? 500 : response.status,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Extract base64 PCM audio
+      const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      const mimeType = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || 'audio/pcm';
+
+      if (!audioData) {
+        return new Response(JSON.stringify({ error: { message: 'No audio data in response' } }), {
+          status: 500, headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      return new Response(JSON.stringify({ audioData, mimeType }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    // ── Text generation mode (default) ───────────────────────────────────────
     const model = 'gemini-2.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-
-    // gemini-2.5-flash supports up to 65536 output tokens
-    // Use full limit — no more truncation issues
     const maxTokens = 65536;
 
     const geminiBody = {
@@ -45,9 +107,8 @@ export async function onRequestPost(context) {
 
     const data = await response.json();
 
-    // Extract text — skip thought parts
     let responseText = '';
-    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+    if (data.candidates?.[0]?.content?.parts) {
       const parts = data.candidates[0].content.parts;
       for (let i = parts.length - 1; i >= 0; i--) {
         if (!parts[i].thought && parts[i].text) {
@@ -73,8 +134,7 @@ export async function onRequestPost(context) {
 
   } catch (e) {
     return new Response(JSON.stringify({ error: { message: 'Worker error: ' + e.message } }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      status: 500, headers: { 'Content-Type': 'application/json' }
     });
   }
 }
