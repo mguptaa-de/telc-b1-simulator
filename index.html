@@ -587,6 +587,317 @@ var FEMALE_NAMES = /anna|petra|marlene|helena|vicki|sarah|lisa|marie|katja|inga|
 var MALE_NAMES   = /hans|stefan|yannick|markus|max|thomas|michael|peter|martin|daniel|männlich|male|mann|david|george|reed/i;
 
 var _allVoices    = [];
+// ── Gemini TTS Engine ─────────────────────────────────────────────────────────
+// Voice map: character type → Gemini TTS voice name
+var TTS_VOICES = {
+  announcer: 'Kore',    // neutral female
+  f_young:   'Aoede',   // young woman
+  f_middle:  'Leda',    // middle-aged woman
+  f_old:     'Erinome', // older woman
+  m_young:   'Puck',    // young man
+  m_middle:  'Charon',  // middle-aged man
+  m_old:     'Fenrir',  // older man
+  child:     'Zephyr',  // child/teenager
+  moderator: 'Kore',    // professional female
+  guest:     'Charon'   // male guest
+};
+
+// HV1 speaker rotation (5 distinct character types)
+var HV1_CHAR_TYPES = ['f_young','m_old','f_middle','m_young','child'];
+
+// HV3 context → character type
+var HV3_CTX_CHAR = {
+  bahnhof: 'm_middle', kaufhaus: 'f_young', schule: 'f_middle',
+  bibliothek: 'f_old', konzertsaal: 'm_old',
+  arzt: 'f_middle', krankenhaus: 'f_middle', airport: 'm_middle'
+};
+
+// Convert raw PCM (16-bit LE, 24kHz, mono) base64 to WAV data URI
+function pcmToWavDataUri(base64Pcm) {
+  var pcmBytes = atob(base64Pcm);
+  var pcmLen = pcmBytes.length;
+  var sampleRate = 24000;
+  var numChannels = 1;
+  var bitsPerSample = 16;
+  var byteRate = sampleRate * numChannels * bitsPerSample / 8;
+  var blockAlign = numChannels * bitsPerSample / 8;
+  var wavBuf = new ArrayBuffer(44 + pcmLen);
+  var view = new DataView(wavBuf);
+  function writeStr(off, s) { for (var i=0;i<s.length;i++) view.setUint8(off+i, s.charCodeAt(i)); }
+  function writeU32(off, v) { view.setUint32(off, v, true); }
+  function writeU16(off, v) { view.setUint16(off, v, true); }
+  writeStr(0,'RIFF'); writeU32(4, 36+pcmLen); writeStr(8,'WAVE');
+  writeStr(12,'fmt '); writeU32(16,16); writeU16(20,1);
+  writeU16(22,numChannels); writeU32(24,sampleRate); writeU32(28,byteRate);
+  writeU16(32,blockAlign); writeU16(34,bitsPerSample);
+  writeStr(36,'data'); writeU32(40,pcmLen);
+  for (var i=0;i<pcmLen;i++) view.setUint8(44+i, pcmBytes.charCodeAt(i));
+  var wavBytes = new Uint8Array(wavBuf);
+  var binary = '';
+  for (var j=0;j<wavBytes.length;j++) binary += String.fromCharCode(wavBytes[j]);
+  return 'data:audio/wav;base64,' + btoa(binary);
+}
+
+// Call /api/generate in TTS mode
+function fetchTTS(text, voice, onDone) {
+  fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: 'tts', text: text, voice: voice })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) { console.warn('[TTS] Error:', d.error.message); onDone(null); return; }
+    try {
+      var wavUri = pcmToWavDataUri(d.audioData);
+      onDone(wavUri);
+    } catch(e) { console.warn('[TTS] PCM decode error:', e); onDone(null); }
+  })
+  .catch(function(e){ console.warn('[TTS] Network error:', e); onDone(null); });
+}
+
+// Multi-speaker TTS for HV2 interview
+function fetchTTSMulti(text, speakers, onDone) {
+  fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: 'tts', text: text, speakers: speakers })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) { console.warn('[TTS Multi] Error:', d.error.message); onDone(null); return; }
+    try {
+      var wavUri = pcmToWavDataUri(d.audioData);
+      onDone(wavUri);
+    } catch(e) { console.warn('[TTS Multi] PCM decode error:', e); onDone(null); }
+  })
+  .catch(function(e){ console.warn('[TTS Multi] Network error:', e); onDone(null); });
+}
+
+// Play a pre-generated audio data URI, returns Promise that resolves when done
+function playAudioUri(uri) {
+  return new Promise(function(resolve) {
+    if (!uri) { resolve(); return; }
+    var audio = new Audio(uri);
+    audio.onended = resolve;
+    audio.onerror = resolve;
+    audio.play().catch(resolve);
+  });
+}
+
+// Generate all Hören audio clips and store them in questions object
+// Called after questions are generated, before exam starts
+function pregenHVAudio(q, onProgress, onDone) {
+  var tasks = [];
+  var total = 0;
+  var completed = 0;
+
+  function addTask(fn) { tasks.push(fn); total++; }
+
+  // HV1: 5 monologues, each a separate TTS call
+  if (q.hv1 && q.hv1.texts) {
+    q.hv1.texts.forEach(function(item, idx) {
+      addTask(function(cb) {
+        var charType = HV1_CHAR_TYPES[idx % 5];
+        var voice = TTS_VOICES[charType];
+        fetchTTS(item.text, voice, function(uri) {
+          item.audioUri = uri;
+          completed++;
+          if (onProgress) onProgress(completed, total, 'HV1 Aussage ' + (idx+1));
+          cb();
+        });
+      });
+    });
+  }
+
+  // HV2: single multi-speaker call for entire dialogue
+  if (q.hv2 && (q.hv2.dialogue || q.hv2.texts)) {
+    addTask(function(cb) {
+      // Build formatted transcript for multi-speaker TTS
+      // ACFG.hv2 stores dialogue as .texts (processed from .dialogue)
+      // Original dialogue data has .spk and .txt fields
+      var dlgArr = q.hv2.dialogue || q.hv2.texts || [];
+      var transcript = dlgArr.map(function(turn) {
+        var spk = turn.spk || (turn.isMod ? 'Moderator' : 'Gast');
+        var txt = turn.txt || turn.text || '';
+        return spk + ': ' + txt;
+      }).join('\n');
+      var speakers = [
+        { name: 'Moderator', voice: TTS_VOICES.moderator },
+        { name: 'Gast', voice: TTS_VOICES.guest }
+      ];
+      fetchTTSMulti(transcript, speakers, function(uri) {
+        q.hv2.audioUri = uri;
+        completed++;
+        if (onProgress) onProgress(completed, total, 'HV2 Interview');
+        cb();
+      });
+    });
+  }
+
+  // HV3: 5 announcements, each a separate call
+  if (q.hv3 && q.hv3.texts) {
+    q.hv3.texts.forEach(function(item, idx) {
+      addTask(function(cb) {
+        var charType = HV3_CTX_CHAR[item.context] || 'f_middle';
+        var voice = TTS_VOICES[charType];
+        fetchTTS(item.text, voice, function(uri) {
+          item.audioUri = uri;
+          completed++;
+          if (onProgress) onProgress(completed, total, 'HV3 Durchsage ' + (idx+1));
+          cb();
+        });
+      });
+    });
+  }
+
+  if (tasks.length === 0) { onDone(); return; }
+
+  // Run tasks sequentially (avoid rate limits)
+  var idx = 0;
+  function runNext() {
+    if (idx >= tasks.length) { onDone(); return; }
+    tasks[idx++](function() {
+      setTimeout(runNext, 300); // 300ms gap between TTS calls
+    });
+  }
+  runNext();
+}
+
+// Updated playHV1 using pre-generated audio
+async function playHV1_TTS(c) {
+  var total = c.texts.length;
+  for (var i = 0; i < total; i++) {
+    var item = c.texts[i];
+    var numWord = NUM_WORDS[item.num] || String(item.num);
+    setTrack('hv1', 'Aussage ' + numWord + ' (' + (i+1) + '/' + total + ')');
+    setFill('hv1', (i / total) * 100);
+
+    // Announce number with browser TTS (short phrase)
+    await speak('Nummer ' + numWord + '.', {
+      rate: 0.82, pitch: 1.0, vol: 1.0,
+      voice: _slots[0] || (_deVoices[0]||null),
+      pauseAfter: 600
+    });
+
+    // Play pre-generated audio if available, else fall back to browser TTS
+    if (item.audioUri) {
+      await playAudioUri(item.audioUri);
+      await pause(1200);
+    } else {
+      var hv1Profiles = [
+        CHAR_PROFILES.f_young, CHAR_PROFILES.m_old, CHAR_PROFILES.f_middle,
+        CHAR_PROFILES.m_young, CHAR_PROFILES.child
+      ];
+      var prof = hv1Profiles[i % 5];
+      var isMaleProf = (i===1||i===3);
+      var hv1voice = isMaleProf ? (_slots[4]||_deVoices[0]||null) : (_slots[1]||_deVoices[0]||null);
+      await speak(item.text, { voice: hv1voice, pitch: prof.pitch, rate: prof.rate, vol:1.0, pauseAfter:1400 });
+    }
+    await pause(600);
+  }
+  setFill('hv1', 100);
+  setTrack('hv1', '✅ Teil 1 vollständig abgespielt');
+  setBtn('hv1', '✅ Abgespielt', true, false);
+  setPlays('hv1', 'Nicht mehr abspielbar');
+}
+
+// Updated playHV2 using pre-generated audio
+async function playHV2_TTS(c) {
+  setTrack('hv2', 'Interview wird abgespielt...');
+  setFill('hv2', 10);
+
+  var ann = _slots[0] || (_deVoices[0]||null);
+  await speak('Hörverstehen, Teil zwei. Sie hören ein Interview.', {
+    rate: 0.82, pitch: 1.0, vol: 1.0, voice: ann, pauseAfter: 800
+  });
+
+  if (c.audioUri) {
+    // Play pre-generated full interview audio
+    setFill('hv2', 30);
+    await playAudioUri(c.audioUri);
+    await pause(1000);
+    // Play again
+    setFill('hv2', 60);
+    await speak('Sie hören das Interview noch einmal.', {
+      rate: 0.82, pitch: 1.0, vol: 1.0, voice: ann, pauseAfter: 600
+    });
+    await playAudioUri(c.audioUri);
+  } else {
+    // Fallback to browser TTS
+    var modProf = CHAR_PROFILES.moderator;
+    var guestProf = CHAR_PROFILES.guest;
+    var modVoice  = _slots[0] || (_deVoices[0]||null);
+    var guestVoice = _slots[4] || (_deVoices[0]||null);
+    var playDialogue = async function() {
+      for (var i=0; i<(c.dialogue||[]).length; i++) {
+        var turn = c.dialogue[i];
+        var isMod = turn.spk === 'Moderator';
+        var rate  = isMod ? modProf.rate  : guestProf.rate;
+        var pitch = isMod ? modProf.pitch : guestProf.pitch;
+        await speak(turn.txt, { voice: isMod?modVoice:guestVoice, pitch:pitch, rate:rate, vol:1.0, pauseAfter:400 });
+      }
+    };
+    await playDialogue();
+    await pause(800);
+    await speak('Sie hören das Interview noch einmal.', { rate:0.82, pitch:1.0, vol:1.0, voice:ann, pauseAfter:600 });
+    await playDialogue();
+  }
+
+  setFill('hv2', 100);
+  setTrack('hv2', '✅ Interview zweimal abgespielt');
+  setBtn('hv2', '✅ Abgespielt', true, false);
+  setPlays('hv2', 'Vollständig abgespielt');
+}
+
+// Updated playHV3 using pre-generated audio
+async function playHV3_TTS(c) {
+  var total = c.texts.length;
+  var announcerVoice = _slots[0] || (_deVoices[0]||null);
+  if (c.texts[0] && c.texts[0].context) startAmbient(c.texts[0].context);
+
+  for (var i = 0; i < total; i++) {
+    var item = c.texts[i];
+    if (item.context) startAmbient(item.context);
+    var numWord = NUM_WORDS[item.num] || String(item.num);
+    setTrack('hv3', 'Durchsage ' + numWord + ' (' + (i+1) + '/' + total + ')');
+    setFill('hv3', (i / total) * 100);
+
+    // "Lesen Sie jetzt Aufgabe X." + 6s pause
+    await speak('Lesen Sie jetzt Aufgabe ' + numWord + '.', {
+      rate: 0.82, pitch: 1.0, vol: 1.0, voice: announcerVoice, pauseAfter: 200
+    });
+    await pause(6000);
+
+    if (item.audioUri) {
+      await playAudioUri(item.audioUri);
+      await pause(500);
+      await speak('Sie hören den Text noch einmal.', {
+        rate: 0.82, pitch: 1.0, vol: 1.0, voice: announcerVoice, pauseAfter: 400
+      });
+      await playAudioUri(item.audioUri);
+    } else {
+      // Fallback to browser TTS
+      var ctxProf = { bahnhof:CHAR_PROFILES.m_middle, kaufhaus:CHAR_PROFILES.f_young,
+                      schule:CHAR_PROFILES.f_middle, bibliothek:CHAR_PROFILES.f_old,
+                      konzertsaal:CHAR_PROFILES.m_old }[item.context] || CHAR_PROFILES.f_middle;
+      var isMalCtx = (item.context==='bahnhof'||item.context==='konzertsaal'||item.context==='airport');
+      var annV = isMalCtx?(_slots[4]||_deVoices[0]||null):(_slots[1]||_deVoices[0]||null);
+      await speak(item.text, { rate:ctxProf.rate, pitch:ctxProf.pitch, vol:1.0, voice:annV, pauseAfter:900 });
+      await pause(500);
+      await speak('Sie hören den Text noch einmal.', { rate:0.82, pitch:1.0, vol:1.0, voice:announcerVoice, pauseAfter:400 });
+      await speak(item.text, { rate:ctxProf.rate-0.02, pitch:ctxProf.pitch, vol:1.0, voice:annV, pauseAfter:1400 });
+    }
+    await pause(5000);
+  }
+  _stopAmbient();
+  setFill('hv3', 100);
+  setTrack('hv3', '✅ Alle Durchsagen zweimal abgespielt');
+  setBtn('hv3', '✅ Abgespielt', true, false);
+  setPlays('hv3', 'Vollständig abgespielt');
+}
+
+
 var _deVoices     = [];
 var _femaleVoices = [];
 var _maleVoices   = [];
@@ -1022,7 +1333,7 @@ function startAmbient(contextType) {
 }
 
 
-async function playHV1(c) {
+async function playHV1_TTS(c) {
   var total = c.texts.length; // array of {num, text, speaker, rate, pitch}
   for (var i = 0; i < total; i++) {
     var item = c.texts[i];
@@ -1094,7 +1405,7 @@ async function playHV2once(c, playNum) {
   }
 }
 
-async function playHV2(c) {
+async function playHV2_TTS(c) {
   c.busy = true;
   setBtn('hv2', '🔊 Interview läuft (1/2)...', true, true);
   setPlays('hv2', '2. Wiedergabe folgt automatisch');
@@ -1126,7 +1437,7 @@ async function playHV2(c) {
 
 // ── TEIL 3: DURCHSAGEN ───────────────────────────────────────────────────────
 // Each announcement: announce number, play once, short pause, play again, then next
-async function playHV3(c) {
+async function playHV3_TTS(c) {
   var total = c.texts.length;
   var announcerVoice = _slots[0] || (_deVoices[0]||null);
   // Start ambient for first item context
@@ -1214,9 +1525,9 @@ function ttsStart(id) {
   })
   .then(function(){
     setBtn(id, '🔊 Läuft...', true, true);
-    if (id === 'hv1') return playHV1(c);
-    if (id === 'hv2') return playHV2(c);
-    if (id === 'hv3') return playHV3(c);
+    if (id === 'hv1') return playHV1_TTS(c);
+    if (id === 'hv2') return playHV2_TTS(c);
+    if (id === 'hv3') return playHV3_TTS(c);
   })
   .catch(function(e){
     setTrack(id, '⚠ Fehler: ' + e);
@@ -2436,7 +2747,7 @@ function extractText(d) {
   return '';
 }
 
-function genFetch(type, cb, _retry) {
+function genFetch(type, cb) {
   var sys = genSYS[type];
   var seed = Math.random().toString(36).slice(2,8);
   fetch('/api/generate', {
@@ -2449,7 +2760,7 @@ function genFetch(type, cb, _retry) {
       system: 'Du bist TELC B1 Pruefungsexperte. Erstelle Aufgaben streng auf TELC B1 Niveau mit folgendem Schwierigkeitsgrad: ' + (window.DIFFICULTY||'B1-Mittel') + '. '
       + 'B1-Einfach: Alltagswortschatz, kurze Saetze, vertraute Themen, sehr klare Struktur. '
       + 'B1-Mittel: Standard B1 TELC Niveau, typische Pruefungsaufgaben. '
-      + 'B1-Schwer: Anspruchsvollere B1 Texte, aber KEIN B2 Vokabular. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen (\"). KEINE typografischen Anfuehrungszeichen. Neue, originelle Aufgaben. Seed: ' + seed,
+      + 'B1-Schwer: Anspruchsvollere B1 Texte, aber KEIN B2 Vokabular. Antworte NUR mit rohem JSON ohne Backticks oder Markdown. Verwende AUSSCHLIESSLICH gerade Anfuehrungszeichen ("). KEINE typografischen Anfuehrungszeichen. Neue, originelle Aufgaben. Seed: ' + seed,
       messages: [{ role: 'user', content: sys.prompt }]
     })
   })
@@ -2457,25 +2768,11 @@ function genFetch(type, cb, _retry) {
   .then(function(d) {
     if (d.error) { console.warn('[genFetch] API error type:',type,'error:',JSON.stringify(d.error)); cb('API-Fehler: '+d.error.message, null); return; }
     var txt = extractText(d);
-    if (!txt) { console.warn('[genFetch] Empty response type:',type); cb('Leere Antwort ('+type+')', null); return; }
+    if (!txt) { console.warn('[genFetch] Empty response type:',type,'full response:',JSON.stringify(d).slice(0,300)); cb('Leere Antwort ('+type+')', null); return; }
     try { cb(null, parseGenJSON(txt)); }
-    catch(e) {
-      console.warn('[genFetch] Parse failed type:',type,'preview:',txt.slice(0,200));
-      if (!_retry) {
-        console.warn('[genFetch] Auto-retrying ' + type + '...');
-        setTimeout(function(){ genFetch(type, cb, true); }, 2000);
-      } else {
-        cb('JSON-Fehler('+type+'): '+txt.slice(0,80), null);
-      }
-    }
+    catch(e) { console.warn('[genFetch] JSON parse failed type:',type); console.warn('Response:', txt.slice(0,500)); console.warn('Parse error:', e); cb('JSON-Fehler('+type+'): '+txt.slice(0,80), null); }
   })
-  .catch(function(e) {
-    if (!_retry) {
-      setTimeout(function(){ genFetch(type, cb, true); }, 2000);
-    } else {
-      cb('Netzwerkfehler: ' + e, null);
-    }
-  });
+  .catch(function(e) { cb('Netzwerkfehler: ' + e, null); });
 }
 
 // ── Inject functions: populate the simulator with new content ──
@@ -2865,22 +3162,48 @@ function genQ(type) {
   }
 
   function finalize() {
-    var ov = document.getElementById('gen-overlay'); if(ov) ov.remove();
-    done = false;
-    if(typeof curS!=='undefined' && document.getElementById('exam') &&
-       document.getElementById('exam').style.display!=='none'){ goSec(0); }
-    var toast = document.createElement('div');
-    if(errors.length > 0) {
-      var names = errors.map(function(e){ return e.split(':')[0]; }).join(', ');
-      toast.style.cssText = 'position:fixed;top:5rem;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--red);color:var(--txt);padding:1rem 1.5rem;z-index:9999;font-size:.82rem;max-width:420px;width:90%;cursor:pointer;box-shadow:0 4px 20px #0004';
-      toast.innerHTML = '<b style="color:var(--red)">Fehler: '+(total-errors.length)+'/'+total+' Teile</b><br><span style="font-size:.78rem">'+names+'</span><br><span style="font-size:.72rem;color:var(--mut)">Klicken zum Schliessen</span>';
-      toast.addEventListener('click', function(){ toast.remove(); });
-    } else {
-      toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--grn);color:#fff;padding:.7rem 1.5rem;border-radius:2px;z-index:9999;font-size:.85rem;font-weight:600';
-      toast.textContent = 'Neues Modellpaper geladen!';
-      setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 3000);
+    // Show TTS audio generation progress
+    var ov = document.getElementById('gen-overlay');
+    if (ov) {
+      var gs = document.getElementById('gen-status');
+      if (gs) gs.textContent = 'Hören-Audio wird generiert (Gemini TTS)...';
+      var pb2 = document.getElementById('gen-pbar');
+      if (pb2) { pb2.style.background='var(--blue)'; pb2.style.width='0%'; }
+      var gp = document.getElementById('gen-parts');
+      if (gp) gp.innerHTML = '🎙 Generating realistic audio for Hörverstehen...';
     }
-    document.body.appendChild(toast);
+
+    // Build HV questions reference for audio generation
+    var hvQ = { hv1: ACFG.hv1, hv2: ACFG.hv2, hv3: ACFG.hv3 };
+
+    pregenHVAudio(hvQ,
+      function(doneN, totalN, label) {
+        var gs2 = document.getElementById('gen-status');
+        if (gs2) gs2.textContent = 'Audio: ' + doneN + '/' + totalN + ' – ' + label;
+        var pb3 = document.getElementById('gen-pbar');
+        if (pb3) pb3.style.width = Math.round(doneN/totalN*100) + '%';
+      },
+      function() {
+        // Write audio URIs back to stored questions
+        // ACFG.hv1/2/3 updated in-place via hvQ reference
+        if (ov) ov.remove();
+        done = false;
+        if(typeof curS!=='undefined' && document.getElementById('exam') &&
+           document.getElementById('exam').style.display!=='none'){ goSec(0); }
+        var toast = document.createElement('div');
+        if(errors.length > 0) {
+          var names = errors.map(function(e){ return e.split(':')[0]; }).join(', ');
+          toast.style.cssText = 'position:fixed;top:5rem;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--red);color:var(--txt);padding:1rem 1.5rem;z-index:9999;font-size:.82rem;max-width:420px;width:90%;cursor:pointer;box-shadow:0 4px 20px #0004';
+          toast.innerHTML = '<b style="color:var(--red)">Fehler: '+(total-errors.length)+'/'+total+' Teile</b><br><span style="font-size:.78rem">'+names+'</span><br><span style="font-size:.72rem;color:var(--mut)">Klicken zum Schliessen</span>';
+          toast.addEventListener('click', function(){ toast.remove(); });
+        } else {
+          toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--grn);color:#fff;padding:.7rem 1.5rem;border-radius:2px;z-index:9999;font-size:.85rem;font-weight:600';
+          toast.textContent = 'Neues Modellpaper geladen! 🎙 Audio bereit.';
+          setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 3000);
+        }
+        document.body.appendChild(toast);
+      }
+    );
   }
 
   // Wrap genFetch in a Promise
@@ -3080,9 +3403,9 @@ function ttsStartAsync(id) {
       return runReadtime(id,c.rsecs);
     }).then(function(){
       setBtn(id,'Laeuft...',true,true);
-      if(id==='hv1')return playHV1(c);
-      if(id==='hv2')return playHV2(c);
-      if(id==='hv3')return playHV3(c);
+      if(id==='hv1')return playHV1_TTS(c);
+      if(id==='hv2')return playHV2_TTS(c);
+      if(id==='hv3')return playHV3_TTS(c);
     }).then(function(){c.busy=false;resolve();})
     .catch(function(e){setTrack(id,'Fehler: '+e);c.busy=false;resolve();});
   });
